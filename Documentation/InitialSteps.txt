@@ -1,0 +1,36 @@
+Front-End
+.NET MAUI
+https://learn.microsoft.com/en-us/dotnet/maui/what-is-maui?view=net-maui-9.0
+
+What is .NET MAUI
+What Programming Languages we use here
+
+
+
+
+Back-End
+
+Django
+What is .NET MAUI
+What Programming Languages we use here
+
+
+--------------------------------------
+
+
+
+
+
+Tool
+Confluence
+Figma
+
+
+
+
+
+Self Development
+Logic ---- Project
+Syntax ---- ChatGPT/Course
+
+Research --- There is always a way
