@@ -11,13 +11,13 @@ class CalendarCard extends StatelessWidget {
   final ValueChanged<CalendarFormat> onFormatChanged;
 
   const CalendarCard({
-    Key? key,
+    super.key,
     required this.selectedDay,
     required this.calendarFormat,
     required this.events,
     required this.onDaySelected,
     required this.onFormatChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +27,12 @@ class CalendarCard extends StatelessWidget {
         boxFit: BoxFit.cover,
         title: GFListTile(
           avatar: const GFAvatar(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.blue,
             child: Icon(Icons.calendar_today, color: Colors.white),
           ),
           title: Text(
             "Selected Date: ${DateFormat('yMMMMd').format(selectedDay)}",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           subTitle: Text(
             "Tap on a date to add events",
@@ -50,15 +50,15 @@ class CalendarCard extends StatelessWidget {
           eventLoader: (day) => events[day] ?? [],
           calendarStyle: CalendarStyle(
             todayDecoration: BoxDecoration(
-              color: Colors.deepPurple,
+              color: Colors.blue,
               shape: BoxShape.circle,
             ),
             selectedDecoration: BoxDecoration(
-              color: Colors.orange,
+              color: Colors.blue,
               shape: BoxShape.circle,
             ),
             markerDecoration: BoxDecoration(
-              color: Colors.red,
+              color: Colors.blue,
               shape: BoxShape.circle,
             ),
           ),
