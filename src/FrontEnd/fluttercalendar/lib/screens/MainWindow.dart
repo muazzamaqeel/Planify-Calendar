@@ -105,15 +105,6 @@ class _MainWindowState extends State<MainWindow> {
                     ),
                   ],
                 ),
-              
-              // Add a privacy policy link
-              TextButton(
-                onPressed: () {
-                  // Handle privacy policy navigation
-                },
-                child: Text('Privacy Policy'),
-              ),
-
               ],
             ),
           ),
