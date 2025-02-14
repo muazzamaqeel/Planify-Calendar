@@ -18,7 +18,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   DateTime _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  Map<DateTime, List<String>> _events = {};
+  final Map<DateTime, List<String>> _events = {};
 
   void _incrementCounter() {
     setState(() {
