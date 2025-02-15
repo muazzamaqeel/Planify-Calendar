@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'TempRegistration.dart'; // Import the Sign-Up Page
 
 class MainWindow extends StatefulWidget {
   const MainWindow({super.key});
@@ -12,11 +13,32 @@ class _MainWindowState extends State<MainWindow> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isSignUpMode = false;
+  bool _obscurePassword = true;
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
+
+  void _navigateToSignUp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TempRegistration()),
+    );
+  }
+
+  // Email Validation
+  String? _validateEmail(String email) {
+    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) {
+      return "Enter a valid email address";
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // A “modern” look often has a clean layout with ample whitespace
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -24,10 +46,11 @@ class _MainWindowState extends State<MainWindow> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // App logo or decorative header can go here
+                // App Logo
                 const FlutterLogo(size: 80),
                 const SizedBox(height: 24),
 
+                // Title
                 Text(
                   _isSignUpMode ? 'Create an Account' : 'Planify',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -37,10 +60,9 @@ class _MainWindowState extends State<MainWindow> {
                 ),
                 const SizedBox(height: 12),
 
+                // Subtitle
                 Text(
-                  _isSignUpMode
-                      ? 'Sign up to get started!'
-                      : 'Sign in to continue',
+                  _isSignUpMode ? 'Sign up to get started!' : 'Sign in to continue',
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -53,24 +75,31 @@ class _MainWindowState extends State<MainWindow> {
                     labelText: 'Email',
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: const OutlineInputBorder(),
+                    errorText: _emailController.text.isNotEmpty
+                        ? _validateEmail(_emailController.text)
+                        : null,
                   ),
+                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field
+                // Password Field with Toggle Visibility
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: _togglePasswordVisibility,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // Sign In / Sign Up Button
-
                 FilledButton(
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
@@ -79,6 +108,15 @@ class _MainWindowState extends State<MainWindow> {
                   ),
                   onPressed: () {
                     // Handle authentication logic
+                    if (_validateEmail(_emailController.text) != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please enter a valid email")),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(_isSignUpMode ? "Signing Up..." : "Signing In...")),
+                      );
+                    }
                   },
                   child: Text(_isSignUpMode ? 'SIGN UP' : 'SIGN IN'),
                 ),
@@ -99,12 +137,17 @@ class _MainWindowState extends State<MainWindow> {
                           _passwordController.clear();
                         });
                       },
-                      child: Text(
-                        _isSignUpMode ? 'Sign In' : 'Sign Up',
-                      ),
+                      child: Text(_isSignUpMode ? 'Sign In' : 'Sign Up'),
                     ),
                   ],
                 ),
+
+                // Separate Sign-Up Page Navigation
+                if (!_isSignUpMode)
+                  TextButton(
+                    onPressed: _navigateToSignUp,
+                    child: const Text("Create an account"),
+                  ),
               ],
             ),
           ),
