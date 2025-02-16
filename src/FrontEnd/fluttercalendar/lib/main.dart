@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/MainWindow.dart'; // or MainWindow.dart if you kept uppercase
+import 'screens/MainWindow.dart'; // Home Screen (Login)
+import 'screens/TempRegistration.dart';  // Sign-Up Page
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const MainWindow(), // Matches the class name in main_window.dart
+      home: const MainWindow(), // Default screen (Login)
+      routes: {
+        '/signup': (context) => TempRegistration(), // Route for Sign-Up Page
+      },
     );
   }
 }
