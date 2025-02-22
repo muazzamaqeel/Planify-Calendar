@@ -3,7 +3,7 @@ import 'package:getwidget/getwidget.dart';
 
 class EventList extends StatelessWidget {
   final List<String> events;
-  const EventList({Key? key, required this.events}) : super(key: key);
+  const EventList({super.key, required this.events});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TempRegistration extends StatefulWidget {
+  const TempRegistration({super.key});
+
   @override
   _TempRegistrationState createState() => _TempRegistrationState();
 }
