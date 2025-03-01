@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/MainWindow.dart'; // Home Screen (Login)
-import 'screens/TempRegistration.dart';  // Sign-Up Page
+import 'screens/TempRegistration.dart'; // Sign-Up Page
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const MainWindow(), // Default screen (Login)
       routes: {
-        '/signup': (context) => TempRegistration(), // Route for Sign-Up Page
+        //'/signup': (context) => TempRegistration(), // Route for Sign-Up Page
       },
     );
   }
