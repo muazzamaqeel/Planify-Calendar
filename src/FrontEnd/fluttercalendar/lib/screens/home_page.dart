@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'MainWindow.dart'; // Import the login screen
 
 import '../widgets/calendar_card.dart';
 import '../widgets/event_list.dart';
@@ -49,12 +50,26 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _signOut() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const MainWindow()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GFAppBar(
         title: Text(widget.title),
         backgroundColor: Colors.deepPurple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout), // Logout icon
+            onPressed: _signOut, // Call the sign-out function
+            tooltip: "Sign Out",
+          ),
+        ],
       ),
       body: Column(
         children: [
