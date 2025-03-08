@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'TempRegistration.dart'; // Import the Sign-Up Page
+import 'home_page.dart'; // Import the Home Page
 
 class MainWindow extends StatefulWidget {
   const MainWindow({super.key});
@@ -30,7 +31,8 @@ class _MainWindowState extends State<MainWindow> {
 
   // Email Validation
   String? _validateEmail(String email) {
-    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) {
+    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        .hasMatch(email)) {
       return "Enter a valid email address";
     }
     return null;
@@ -62,7 +64,9 @@ class _MainWindowState extends State<MainWindow> {
 
                 // Subtitle
                 Text(
-                  _isSignUpMode ? 'Sign up to get started!' : 'Sign in to continue',
+                  _isSignUpMode
+                      ? 'Sign up to get started!'
+                      : 'Sign in to continue',
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -92,7 +96,9 @@ class _MainWindowState extends State<MainWindow> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: _togglePasswordVisibility,
                     ),
                   ),
@@ -107,14 +113,17 @@ class _MainWindowState extends State<MainWindow> {
                     backgroundColor: Colors.blueGrey.shade900,
                   ),
                   onPressed: () {
-                    // Handle authentication logic
                     if (_validateEmail(_emailController.text) != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Please enter a valid email")),
                       );
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(_isSignUpMode ? "Signing Up..." : "Signing In...")),
+                      // Navigate to Home Page after signing in
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MyHomePage(title: "Calendar Home")),
                       );
                     }
                   },
