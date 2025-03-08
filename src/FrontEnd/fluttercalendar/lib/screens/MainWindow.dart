@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'TempRegistration.dart'; // Import the Sign-Up Page
 
 class MainWindow extends StatefulWidget {
@@ -15,6 +17,10 @@ class _MainWindowState extends State<MainWindow> {
   bool _isSignUpMode = false;
   bool _obscurePassword = true;
 
+  //final String _baseUrl = "http://10.0.2.2:8000/api"; // For Android Emulator
+  final String _baseUrl =
+      "http://localhost:8000/api"; // Correct for Flutter Web
+
   void _togglePasswordVisibility() {
     setState(() {
       _obscurePassword = !_obscurePassword;
@@ -28,12 +34,75 @@ class _MainWindowState extends State<MainWindow> {
     );
   }
 
-  // Email Validation
   String? _validateEmail(String email) {
-    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) {
+    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        .hasMatch(email)) {
       return "Enter a valid email address";
     }
     return null;
+  }
+
+  // Enhanced API Request Function
+  Future<void> _authenticateUser() async {
+    final String endpoint = _isSignUpMode ? 'signup/' : 'signin/';
+
+    // Show "Call Made" immediately when button is pressed
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Call Made")));
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/$endpoint'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'])),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("Error: ${response.statusCode} - ${response.body}")),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Network Error: $error")),
+      );
+    }
+  }
+
+  Future<void> _connectWithBackend() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/'), // Correct endpoint for the API home
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'No message received')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("Error: ${response.statusCode} - ${response.body}")),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Network Error: $error")),
+      );
+    }
   }
 
   @override
@@ -46,11 +115,9 @@ class _MainWindowState extends State<MainWindow> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // App Logo
                 const FlutterLogo(size: 80),
                 const SizedBox(height: 24),
 
-                // Title
                 Text(
                   _isSignUpMode ? 'Create an Account' : 'Planify',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -60,15 +127,6 @@ class _MainWindowState extends State<MainWindow> {
                 ),
                 const SizedBox(height: 12),
 
-                // Subtitle
-                Text(
-                  _isSignUpMode ? 'Sign up to get started!' : 'Sign in to continue',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-
-                // Email Field
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -83,7 +141,6 @@ class _MainWindowState extends State<MainWindow> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field with Toggle Visibility
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -92,37 +149,37 @@ class _MainWindowState extends State<MainWindow> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: _togglePasswordVisibility,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
-                // Sign In / Sign Up Button
                 FilledButton(
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
-                    iconColor: Colors.blueGrey,
                     backgroundColor: Colors.blueGrey.shade900,
                   ),
-                  onPressed: () {
-                    // Handle authentication logic
-                    if (_validateEmail(_emailController.text) != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Please enter a valid email")),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(_isSignUpMode ? "Signing Up..." : "Signing In...")),
-                      );
-                    }
-                  },
+                  onPressed: _authenticateUser,
                   child: Text(_isSignUpMode ? 'SIGN UP' : 'SIGN IN'),
                 ),
                 const SizedBox(height: 16),
 
-                // Switch between Sign In & Sign Up
+                // 🔥 New Button for Backend Connection
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    backgroundColor: Colors.green.shade700,
+                  ),
+                  onPressed: _connectWithBackend,
+                  child: const Text("Connect with Backend"),
+                ),
+
+                const SizedBox(height: 16),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -142,7 +199,6 @@ class _MainWindowState extends State<MainWindow> {
                   ],
                 ),
 
-                // Separate Sign-Up Page Navigation
                 if (!_isSignUpMode)
                   TextButton(
                     onPressed: _navigateToSignUp,
