@@ -1,0 +1,64 @@
+Internal Server Error: /api/validate_user/
+Traceback (most recent call last):
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\api\views.py", line 61, in validate_user
+    with connection.cursor() as cursor:
+         ^^^^^^^^^^^^^^^^^
+AttributeError: module 'multiprocessing.connection' has no attribute 'cursor'
+"POST /api/validate_user/ HTTP/1.1" 500 97336
+Internal Server Error: /api/validate_user/
+Traceback (most recent call last):
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\api\views.py", line 61, in validate_user
+    with connection.cursor() as cursor:
+         ^^^^^^^^^^^^^^^^^
+AttributeError: module 'multiprocessing.connection' has no attribute 'cursor'
+"POST /api/validate_user/ HTTP/1.1" 500 97360
+Internal Server Error: /api/validate_user/
+Traceback (most recent call last):
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\api\views.py", line 61, in validate_user
+    with connection.cursor() as cursor:
+         ^^^^^^^^^^^^^^^^^
+AttributeError: module 'multiprocessing.connection' has no attribute 'cursor'
+"POST /api/validate_user/ HTTP/1.1" 500 97352
+Internal Server Error: /api/validate_user/
+Traceback (most recent call last):
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\virtual_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\programming\NeuroCalendar\src\BackEnd\api\views.py", line 61, in validate_user
+    with connection.cursor() as cursor:
+         ^^^^^^^^^^^^^^^^^
+AttributeError: module 'multiprocessing.connection' has no attribute 'cursor'
+"POST /api/validate_user/ HTTP/1.1" 500 97352

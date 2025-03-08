@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api import views  # Import the views
+from api import views  # Import your API views here
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  # API routes
-    path('', views.api_home, name='home'),  # Add this route for '/'
+    path('api/', include('api.urls')),  # Routes all /api/ to api/urls.py
+    path('', views.api_home, name='home'),  # Root URL → api_home
 ]
