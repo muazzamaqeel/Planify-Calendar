@@ -21,4 +21,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # 6. Set the default command to run your MySQL setup script
-CMD ["python", "database/mysql_setup.py"]
+CMD ["python", "database/mysql_setup/mysql_setup.py"]
