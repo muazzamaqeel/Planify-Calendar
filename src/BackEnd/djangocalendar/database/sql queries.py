@@ -1,52 +1,67 @@
-import json
-from django.db import connection
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+import os
+import time
+import MySQLdb
 
-@csrf_exempt
-def validate_user(request):
-    """
-    Validates a user by checking username & password in the `persons` table.
-    Example JSON POST body:
-    {
-      "username": "some_username",
-      "password": "some_password"
-    }
-    """
-    if request.method == 'POST':
+def read_sql_file(file_path):
+    """Reads the SQL file and returns its content as a string."""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+def main():
+    # Load environment variables
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = int(os.getenv("DB_PORT", "3306"))
+    DB_NAME = os.getenv("DB_NAME", "djangocalendar")
+    DB_USER = os.getenv("DB_USER", "root")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+
+    print(f"Connecting to MySQL at {DB_HOST}:{DB_PORT} ...")
+
+    # Try connecting to the database with retries
+    conn = None
+    max_retries = 10
+    for attempt in range(1, max_retries + 1):
         try:
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
-
-            if not username or not password:
-                return JsonResponse(
-                    {'error': 'Username and password are required'},
-                    status=400
-                )
-
-            # Raw SQL query to validate user
-            with connection.cursor() as cursor:
-                # Using parameterized query to prevent SQL injection
-                cursor.execute(
-                    "SELECT id FROM persons WHERE username = %s AND password = %s",
-                    [username, password]
-                )
-                row = cursor.fetchone()
-
-            if row:
-                # row[0] is the user id
-                return JsonResponse({
-                    'message': 'Login successful',
-                    'user_id': row[0]
-                })
+            conn = MySQLdb.connect(
+                host=DB_HOST,
+                port=DB_PORT,
+                user=DB_USER,
+                passwd=DB_PASSWORD,
+                db=DB_NAME
+            )
+            print("Connection established.")
+            break
+        except MySQLdb.OperationalError as e:
+            print(f"Attempt {attempt} failed: {e}")
+            if attempt < max_retries:
+                print("Retrying in 5 seconds...")
+                time.sleep(5)
             else:
-                return JsonResponse(
-                    {'error': 'Invalid credentials'},
-                    status=401
-                )
+                print("Max retries reached. Could not connect to the database.")
+                return
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+    try:
+        # Build the absolute path to schema.sql based on this file's location
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        schema_path = os.path.join(script_dir, "schema.sql")
+        print(f"Reading schema from: {schema_path}")
+        schema_sql = read_sql_file(schema_path)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+        # Split and execute each SQL statement
+        statements = schema_sql.split(";")
+        with conn.cursor() as cursor:
+            for statement in statements:
+                stmt = statement.strip()
+                if stmt:
+                    cursor.execute(stmt + ";")
+        conn.commit()
+        print("Database schema applied successfully.")
+
+    except FileNotFoundError:
+        print("schema.sql not found. Ensure it exists in the same folder as mysql_setup.py.")
+    finally:
+        if conn:
+            conn.close()
+
+if __name__ == "__main__":
+    main()

@@ -1,76 +1,67 @@
 import os
-import mysql.connector
-from mysql.connector import errorcode
+import time
+import MySQLdb
 
-# Read database connection parameters from environment variables
-DB_NAME = os.getenv("DB_NAME", "djangocalendar")
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "muazzamaida")
-DB_HOST = os.getenv("DB_HOST", "db")
-DB_PORT = int(os.getenv("DB_PORT", 3306))
-
-DROP_TABLE_QUERY = "DROP TABLE IF EXISTS persons"
-CREATE_TABLE_QUERY = """
-CREATE TABLE persons (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    username VARCHAR(255) NOT NULL,
-    age INT NOT NULL,
-    gender VARCHAR(10) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-"""
-
-# Insert sample data with realistic names and details
-INSERT_SAMPLE_DATA = """
-INSERT INTO persons (name, username, age, gender, email, password)
-VALUES
-    ('Aida', 'aida', 12, 'Female', 'aida@example.com', '1234'),
-    ('Muazzam', 'muazzam', 12, 'Male', 'muazzam@example.com', '1234'),
-    ('Tom', 'tom', 12, 'Male', 'tom@example.com', '1234'),
-    ('David', 'david', 12, 'Male', 'david@example.com', '1234');
-"""
+def read_sql_file(file_path):
+    """Reads the SQL file and returns its content as a string."""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
 
 def main():
+    # Load environment variables
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = int(os.getenv("DB_PORT", "3306"))
+    DB_NAME = os.getenv("DB_NAME", "djangocalendar")
+    DB_USER = os.getenv("DB_USER", "root")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+
+    print(f"Connecting to MySQL at {DB_HOST}:{DB_PORT} ...")
+
+    # Try connecting to the database with retries
+    conn = None
+    max_retries = 10
+    for attempt in range(1, max_retries + 1):
+        try:
+            conn = MySQLdb.connect(
+                host=DB_HOST,
+                port=DB_PORT,
+                user=DB_USER,
+                passwd=DB_PASSWORD,
+                db=DB_NAME
+            )
+            print("Connection established.")
+            break
+        except MySQLdb.OperationalError as e:
+            print(f"Attempt {attempt} failed: {e}")
+            if attempt < max_retries:
+                print("Retrying in 5 seconds...")
+                time.sleep(5)
+            else:
+                print("Max retries reached. Could not connect to the database.")
+                return
+
     try:
-        print(f"Connecting to MySQL at {DB_HOST}:{DB_PORT} ...")
-        cnx = mysql.connector.connect(
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT,
-            database=DB_NAME
-        )
-        cursor = cnx.cursor()
+        # Build the absolute path to schema.sql relative to this file's directory
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        schema_path = os.path.join(script_dir, "schema.sql")
+        print(f"Reading schema from: {schema_path}")
+        sql_script = read_sql_file(schema_path)
 
-        # Drop the table if it exists
-        cursor.execute(DROP_TABLE_QUERY)
-        print("Dropped table 'persons' if it existed.")
+        # Split and execute each SQL statement
+        statements = sql_script.split(";")
+        with conn.cursor() as cursor:
+            for statement in statements:
+                stmt = statement.strip()
+                if stmt:
+                    cursor.execute(stmt + ";")
+        conn.commit()
+        print("Database schema applied successfully.")
 
-        # Create the new table
-        cursor.execute(CREATE_TABLE_QUERY)
-        cnx.commit()
-        print("Table 'persons' created successfully.")
-
-        # Insert sample data into the table
-        cursor.execute(INSERT_SAMPLE_DATA)
-        cnx.commit()
-        print("Sample data inserted into 'persons' successfully.")
-
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Access denied: Check your username or password.")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print(f"Database '{DB_NAME}' does not exist.")
-        else:
-            print(f"Error: {err}")
+    except FileNotFoundError:
+        print("schema.sql not found. Ensure it exists in the same folder as mysql_setup.py.")
     finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'cnx' in locals() and cnx.is_connected():
-            cnx.close()
+        if conn:
+            conn.close()
 
 if __name__ == "__main__":
     main()
