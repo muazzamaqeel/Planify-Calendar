@@ -1,48 +1,11 @@
 import os
 import time
-import re
 import MySQLdb
 
 def read_sql_file(file_path):
-    """Read the SQL file and return its contents as a string."""
+    """Reads the SQL file and returns its content as a string."""
     with open(file_path, "r", encoding="utf-8") as file:
         return file.read()
-
-def parse_tagged_sql(sql_script):
-    """
-    Parse a SQL script into tagged SQL blocks.
-    Each block starts with a tag comment of the form:
-      -- [tag: some_tag]
-    Returns a list of tuples: (tag, sql_query).
-    """
-    # Regex captures tag and everything until the next tag or end-of-file.
-    pattern = re.compile(
-        r'--\s*\[tag:\s*(?P<tag>.*?)\s*\](?P<query>.*?)(?=(?:--\s*\[tag:)|\Z)',
-        re.DOTALL | re.IGNORECASE
-    )
-    blocks = []
-    for match in pattern.finditer(sql_script):
-        tag = match.group("tag").strip()
-        query = match.group("query").strip().rstrip(";")  # Remove trailing semicolon if any.
-        blocks.append((tag, query))
-    return blocks
-
-def execute_sql_block(cursor, tag, query):
-    """
-    Execute a SQL block and print a descriptive action based on the tag.
-    """
-    # Hardcoded actions for known tags
-    if tag.lower() == "drop_persons_table":
-        print("Action: Dropping table 'persons' if it exists.")
-    elif tag.lower() == "create_persons_table":
-        print("Action: Creating table 'persons' with all required columns.")
-    elif tag.lower() == "insert_sample_data":
-        print("Action: Inserting sample data into the 'persons' table.")
-    else:
-        print(f"Action: Executing query with unrecognized tag '{tag}'.")
-    
-    print(f"Executing SQL:\n{query}\n")
-    cursor.execute(query)
 
 def connect_to_database(host, port, user, password, db, max_retries=10):
     """Try to connect to the database with retry logic."""
@@ -81,16 +44,17 @@ def main():
         schema_path = os.path.join(script_dir, "schema.sql")
         print(f"Reading schema from: {schema_path}")
         sql_script = read_sql_file(schema_path)
-        
-        # Parse the SQL script into tagged blocks
-        tagged_blocks = parse_tagged_sql(sql_script)
-        if not tagged_blocks:
-            print("No tagged SQL blocks found.")
-            return
 
+        # Split the SQL file by semicolon and execute each statement sequentially.
+        # (Assumes that semicolon is only used as a statement delimiter.)
+        queries = sql_script.split(";")
         with conn.cursor() as cursor:
-            for tag, query in tagged_blocks:
-                execute_sql_block(cursor, tag, query)
+            for query in queries:
+                stmt = query.strip()
+                if stmt:
+                    print("Executing SQL statement:")
+                    print(stmt)
+                    cursor.execute(stmt)
         conn.commit()
         print("Database schema applied successfully.")
 
