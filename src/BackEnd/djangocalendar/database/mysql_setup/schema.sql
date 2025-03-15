@@ -1,7 +1,7 @@
--- Drop the table if it exists
+-- [tag: drop_persons_table]
 DROP TABLE IF EXISTS persons;
 
--- Create the 'persons' table
+-- [tag: create_persons_table]
 CREATE TABLE persons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE persons (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Insert sample data
+-- [tag: insert_sample_data]
 INSERT INTO persons (name, username, age, gender, email, password)
 VALUES
     ('Aida', 'aida', 12, 'Female', 'aida@example.com', '1234'),
