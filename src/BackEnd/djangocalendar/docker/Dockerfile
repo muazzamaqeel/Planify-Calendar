@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
  && rm -rf /var/lib/apt/lists/*
 
-# 2. Create a working directory
+# 2. Create a working directory inside the container
 WORKDIR /app
 
 # 3. Copy requirements first (for caching)
@@ -17,8 +17,8 @@ COPY requirements.txt /app/
 # 4. Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy the entire project (including database/ folder)
+# 5. Copy the entire project (this includes the database folder with both mysql_setup.py and schema.sql)
 COPY . /app/
 
-# 6. Default command (overridden by docker-compose if specified)
-CMD ["python", "database/mysql_setup.py"]
+# 6. Set the default command to run your MySQL setup script
+CMD ["python", "database/mysql_setup/mysql_setup.py"]

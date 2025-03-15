@@ -33,7 +33,7 @@ services:
       DB_NAME: djangocalendar
       DB_USER: root
       DB_PASSWORD: muazzamaida
-    command: ["python", "database/mysql_setup.py"]
+    command: ["python", "database/mysql_setup/mysql_setup.py"]
     networks:
       - default
 
