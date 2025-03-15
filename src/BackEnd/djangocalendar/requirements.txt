@@ -3,3 +3,7 @@ Django
 django-crispy-forms
 django-filter
 mysqlclient
+pymysql
+djangorestframework
+django-cors-headers
+cryptography

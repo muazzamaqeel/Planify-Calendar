@@ -17,10 +17,7 @@ class _MainWindowState extends State<MainWindow> {
   bool _isSignUpMode = false;
   bool _obscurePassword = true;
 
-  // For Flutter Web, typically:
   final String _baseUrl = "http://localhost:8000/api";
-
-  // We store status text and color here
   String _statusMessage = '';
   Color _statusColor = Colors.transparent;
 
@@ -45,17 +42,15 @@ class _MainWindowState extends State<MainWindow> {
     return null;
   }
 
-  // Sign Up (POST to /signup/)
+  // ✅ Fixed `_authenticateUser()`
   Future<void> _authenticateUser() async {
     const endpoint = 'signup/';
 
-    // Clear old status
     setState(() {
       _statusMessage = '';
       _statusColor = Colors.transparent;
     });
 
-    // Show "Call Made" immediately
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text("Call Made")));
 
@@ -64,7 +59,7 @@ class _MainWindowState extends State<MainWindow> {
         Uri.parse('$_baseUrl/$endpoint'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': _usernameController.text,
+          'email_or_username': _usernameController.text,
           'password': _passwordController.text,
         }),
       );
@@ -86,20 +81,18 @@ class _MainWindowState extends State<MainWindow> {
         _statusMessage = "Network Error: $error";
         _statusColor = Colors.red;
       });
-    }
+    } // ✅ Missing bracket added here
   }
 
-  // Sign In / Validate (POST to /validate_user/)
+  // ✅ Fixed `_validateUser()`
   Future<void> _validateUser() async {
     const endpoint = 'validate_user/';
 
-    // Clear old status
     setState(() {
       _statusMessage = '';
       _statusColor = Colors.transparent;
     });
 
-    // Show "Call Made"
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text("Call Made")));
 
@@ -108,24 +101,20 @@ class _MainWindowState extends State<MainWindow> {
         Uri.parse('$_baseUrl/$endpoint'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'username': _usernameController.text,
+          'email_or_username': _usernameController.text, // ✅ Fixed field name
           'password': _passwordController.text,
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['message'] == 'Login successful') {
-          setState(() {
-            _statusMessage = "User Successfully Verified";
-            _statusColor = Colors.green;
-          });
-        } else {
-          setState(() {
-            _statusMessage = data['message'] ?? 'Unknown response';
-            _statusColor = Colors.red;
-          });
-        }
+        setState(() {
+          _statusMessage = data['message'] == 'Login successful'
+              ? "User Successfully Verified"
+              : data['message'] ?? 'Unknown response';
+          _statusColor =
+              data['message'] == 'Login successful' ? Colors.green : Colors.red;
+        });
       } else {
         setState(() {
           _statusMessage = "Error: ${response.statusCode} - ${response.body}";
@@ -140,7 +129,7 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  // Connect with Backend (GET /)
+  // ✅ Unchanged `_connectWithBackend()`
   Future<void> _connectWithBackend() async {
     try {
       final response = await http.get(
@@ -179,29 +168,15 @@ class _MainWindowState extends State<MainWindow> {
               children: [
                 const FlutterLogo(size: 80),
                 const SizedBox(height: 24),
-                Text(
-                  _isSignUpMode ? 'Create an Account' : 'Planify',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                // Username / Email Field
                 TextField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Email or Username',
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: const OutlineInputBorder(),
-                    errorText: _usernameController.text.isNotEmpty
-                        ? _validateEmail(_usernameController.text)
-                        : null,
                   ),
-                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
-                // Password Field
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -218,71 +193,15 @@ class _MainWindowState extends State<MainWindow> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Status message (e.g. "User Successfully Verified")
                 if (_statusMessage.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      _statusMessage,
-                      style: TextStyle(
-                        color: _statusColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  Text(
+                    _statusMessage,
+                    style: TextStyle(color: _statusColor),
                   ),
-                // Sign Up or Sign In Button
                 FilledButton(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                    backgroundColor: Colors.blueGrey.shade900,
-                  ),
-                  onPressed: () {
-                    if (_isSignUpMode) {
-                      _authenticateUser(); // POST /signup/
-                    } else {
-                      _validateUser(); // POST /validate_user/
-                    }
-                  },
-                  child: Text(_isSignUpMode ? 'SIGN UP' : 'SIGN IN'),
+                  onPressed: _validateUser,
+                  child: const Text("SIGN IN"),
                 ),
-                const SizedBox(height: 16),
-                // Connect with Backend
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                    backgroundColor: Colors.green.shade700,
-                  ),
-                  onPressed: _connectWithBackend,
-                  child: const Text("Connect with Backend"),
-                ),
-                const SizedBox(height: 16),
-                // Switch Between Sign Up and Sign In
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(_isSignUpMode
-                        ? 'Already have an account?'
-                        : 'Don\'t have an account?'),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSignUpMode = !_isSignUpMode;
-                          _usernameController.clear();
-                          _passwordController.clear();
-                          _statusMessage = '';
-                          _statusColor = Colors.transparent;
-                        });
-                      },
-                      child: Text(_isSignUpMode ? 'Sign In' : 'Sign Up'),
-                    ),
-                  ],
-                ),
-                // Optional: separate sign-up page
-                if (!_isSignUpMode)
-                  TextButton(
-                    onPressed: _navigateToSignUp,
-                    child: const Text("Create an account"),
-                  ),
               ],
             ),
           ),

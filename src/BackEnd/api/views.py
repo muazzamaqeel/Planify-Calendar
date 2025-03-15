@@ -64,14 +64,18 @@ def validate_user(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            username = data.get('username')
+            email_or_username = data.get('email_or_username')
             password = data.get('password')
+
+
+            if not email_or_username or not password:
+                return JsonResponse({'error': 'Username/email and password are required'}, status=400)
 
             # For demonstration only - raw SQL (use Django's Auth in production!)
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT id FROM persons WHERE username = %s AND password = %s",
-                    [username, password]
+                    "SELECT id FROM persons WHERE (username = %s OR email = %s) AND password = %s",
+                    [email_or_username,email_or_username,password]
                 )
                 row = cursor.fetchone()
 
