@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/MainWindow.dart'; // Home Screen (Login)
-import 'screens/TempRegistration.dart'; // Sign-Up Page
+import 'screens/main_view/MainWindow.dart'; // Home Screen (Login)
+import 'screens/main_view/TempRegistration.dart';
 
 void main() {
   runApp(const MyApp());
