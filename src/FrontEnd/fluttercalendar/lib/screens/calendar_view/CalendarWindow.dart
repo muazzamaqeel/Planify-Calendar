@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+
 import '../main_view/MainWindow.dart';
 import 'components/calendar_card.dart';
 import 'components/event_list.dart';
+// Updated import to match the actual file name and location.
+import 'notification_handler/NotificationsWindow.dart';
 
 class CalendarWindow extends StatefulWidget {
   const CalendarWindow({Key? key}) : super(key: key);
@@ -67,14 +70,23 @@ class _CalendarWindowState extends State<CalendarWindow> {
       appBar: GFAppBar(
         title: const Text(
           "Planify",
-          // Making the text also bold and white for better visibility
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-            ),
+          // Making the text bold and white for better visibility
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
+        ),
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // Call the overlay function from NotificationsWindow.
+              NotificationsWindow.showNotificationOverlay(context);
+            },
+          ),
+        ],
       ),
 
       // Dark-themed navigation drawer
@@ -97,20 +109,17 @@ class _CalendarWindowState extends State<CalendarWindow> {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_today, color: Colors.white),
-              title:
-                  const Text('Calendar', style: TextStyle(color: Colors.white)),
+              title: const Text('Calendar', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.event, color: Colors.white),
-              title:
-                  const Text('Events', style: TextStyle(color: Colors.white)),
+              title: const Text('Events', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.settings, color: Colors.white),
-              title:
-                  const Text('Settings', style: TextStyle(color: Colors.white)),
+              title: const Text('Settings', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             const Spacer(),
@@ -124,9 +133,8 @@ class _CalendarWindowState extends State<CalendarWindow> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => const MainWindow()),
-                    (Route<dynamic> route) => false, // removes all previous routes
+                    (Route<dynamic> route) => false,
                   );
-                  // Removed Navigator.popUntil call as it causes error when the route stack is empty.
                 },
                 icon: const Icon(Icons.logout),
                 label: const Text('Logout'),
@@ -164,7 +172,7 @@ class _CalendarWindowState extends State<CalendarWindow> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: 'addEvent', // Unique tag for the Add Event button from CA1234
+            heroTag: 'addEvent', // Unique tag for the Add Event button
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
