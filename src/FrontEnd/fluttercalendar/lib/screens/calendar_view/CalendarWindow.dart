@@ -5,7 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import 'calendar_card.dart';
 import 'event_list.dart';
-
+import '../main_view/MainWindow.dart';
 
 class CalendarWindow extends StatefulWidget {
   const CalendarWindow({super.key});
@@ -92,7 +92,12 @@ class _CalendarWindowState extends State<CalendarWindow> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.popUntil(context, ModalRoute.withName('/'));
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainWindow()),
+                    (Route<dynamic> route) =>
+                        false, // removes all previous routes
+                  );
                 },
                 icon: const Icon(Icons.logout),
                 label: const Text('Logout'),
@@ -120,26 +125,26 @@ class _CalendarWindowState extends State<CalendarWindow> {
         ],
       ),
       // Floating action buttons for adding events and incrementing a counter
-        floatingActionButton: Column(
+      floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-            FloatingActionButton.extended(
+          FloatingActionButton.extended(
             heroTag: 'addEvent', // Unique tag for the Add Event button
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
             backgroundColor: Colors.orange,
-            ),
-            const SizedBox(height: 10),
-            FloatingActionButton.extended(
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
             heroTag: 'incrementCounter', // Unique tag for the Counter button
             onPressed: _incrementCounter,
             label: Text("Count: $_counter"),
             icon: const Icon(Icons.add_circle_outline),
             backgroundColor: Colors.deepPurple,
-            ),
+          ),
         ],
-        ),
+      ),
     );
   }
 }
