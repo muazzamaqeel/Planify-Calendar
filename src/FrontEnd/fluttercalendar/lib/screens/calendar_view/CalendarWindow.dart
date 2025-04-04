@@ -3,8 +3,8 @@ import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import 'calendar_card.dart';
-import 'event_list.dart';
+import 'components/calendar_card.dart';
+import 'components/event_list.dart';
 
 
 class CalendarWindow extends StatefulWidget {
@@ -83,6 +83,20 @@ class _CalendarWindowState extends State<CalendarWindow> {
             ListTile(
               leading: const Icon(Icons.event),
               title: const Text('Events'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
               },
