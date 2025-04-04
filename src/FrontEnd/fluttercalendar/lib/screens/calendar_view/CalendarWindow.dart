@@ -10,7 +10,7 @@ import 'notification_handler/NotificationsWindow.dart'; // Notifications overlay
 import 'sidebar/sidebar_view.dart'; // Side bar code
 
 class CalendarWindow extends StatefulWidget {
-  const CalendarWindow({Key? key}) : super(key: key);
+  const CalendarWindow({super.key});
 
   @override
   State<CalendarWindow> createState() => _CalendarWindowState();
@@ -22,58 +22,55 @@ class _CalendarWindowState extends State<CalendarWindow> {
   final Map<DateTime, List<String>> _events = {};
   int _counter = 0;
 
-  // Called when a user selects a day on the calendar
   void _onDaySelected(DateTime selectedDay) {
     setState(() {
       _selectedDay = selectedDay;
     });
   }
 
-  // Called when the user changes between Month/2-weeks/Week format
   void _onFormatChanged(CalendarFormat format) {
     setState(() {
       _calendarFormat = format;
     });
   }
 
-  // Adds a new event to the selected day
   void _addEvent() {
     setState(() {
-      _events[_selectedDay] ??= [];
+      if (_events[_selectedDay] == null) {
+        _events[_selectedDay] = [];
+      }
       _events[_selectedDay]!.add(
         "Event at ${DateFormat('hh:mm a').format(DateTime.now())}",
       );
     });
   }
 
-  // Simple counter increment
   void _incrementCounter() {
     setState(() {
       _counter++;
     });
   }
 
-  // Jump back to today's date
-  void _goToToday() {
-    setState(() {
-      _selectedDay = DateTime.now();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Subtle grey background for a modern, cohesive look
-      backgroundColor: Colors.grey[200],
-
-      // Darker app bar for contrast
       appBar: GFAppBar(
-        title: const Text(
-          "Planify",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        // Combined title that preserves both branches' naming
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+              "Planify",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              "Modern Flutter Calendar",
+              style: TextStyle(fontSize: 12, color: Colors.white70),
+            ),
+          ],
         ),
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -87,10 +84,8 @@ class _CalendarWindowState extends State<CalendarWindow> {
           ),
         ],
       ),
-
       // Use the side bar from sidebar_view.dart
       drawer: const SideBarView(),
-
       body: Column(
         children: [
           // Calendar UI widget
@@ -101,25 +96,20 @@ class _CalendarWindowState extends State<CalendarWindow> {
             onDaySelected: _onDaySelected,
             onFormatChanged: _onFormatChanged,
           ),
-
           // Event list for the selected day
           Expanded(
-            child: Container(
-              color: Colors.grey[100],
-              child: EventList(
-                events: _events[_selectedDay] ?? [],
-              ),
+            child: EventList(
+              events: _events[_selectedDay] ?? [],
             ),
           ),
         ],
       ),
-
-      // Floating action buttons for adding events, counting, and going to "Today"
+      // Floating action buttons for adding events and incrementing a counter
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: 'addEvent',
+            heroTag: 'addEvent', // Unique tag for the Add Event button
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
@@ -127,18 +117,10 @@ class _CalendarWindowState extends State<CalendarWindow> {
           ),
           const SizedBox(height: 10),
           FloatingActionButton.extended(
-            heroTag: 'incrementCounter',
+            heroTag: 'incrementCounter', // Unique tag for the Counter button
             onPressed: _incrementCounter,
             label: Text("Count: $_counter"),
             icon: const Icon(Icons.add_circle_outline),
-            backgroundColor: Colors.deepPurple,
-          ),
-          const SizedBox(height: 10),
-          FloatingActionButton.extended(
-            heroTag: 'goToToday',
-            onPressed: _goToToday,
-            label: const Text("Today"),
-            icon: const Icon(Icons.today),
             backgroundColor: Colors.deepPurple,
           ),
         ],
