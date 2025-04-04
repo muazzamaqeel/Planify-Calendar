@@ -6,8 +6,8 @@ import 'package:table_calendar/table_calendar.dart';
 import '../main_view/MainWindow.dart';
 import 'components/calendar_card.dart';
 import 'components/event_list.dart';
-// Updated import to match the actual file name and location.
-import 'notification_handler/NotificationsWindow.dart';
+import 'notification_handler/NotificationsWindow.dart'; // Notifications overlay
+import 'sidebar/sidebar_view.dart'; // Side bar code
 
 class CalendarWindow extends StatefulWidget {
   const CalendarWindow({Key? key}) : super(key: key);
@@ -70,7 +70,6 @@ class _CalendarWindowState extends State<CalendarWindow> {
       appBar: GFAppBar(
         title: const Text(
           "Planify",
-          // Making the text bold and white for better visibility
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -82,67 +81,15 @@ class _CalendarWindowState extends State<CalendarWindow> {
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              // Call the overlay function from NotificationsWindow.
+              // Show the overlay from NotificationsWindow
               NotificationsWindow.showNotificationOverlay(context);
             },
           ),
         ],
       ),
 
-      // Dark-themed navigation drawer
-      drawer: Drawer(
-        backgroundColor: Colors.blueGrey[700],
-        child: Column(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blueGrey[800]),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  'Hello, Aida!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today, color: Colors.white),
-              title: const Text('Calendar', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.event, color: Colors.white),
-              title: const Text('Events', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings, color: Colors.white),
-              title: const Text('Settings', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainWindow()),
-                    (Route<dynamic> route) => false,
-                  );
-                },
-                icon: const Icon(Icons.logout),
-                label: const Text('Logout'),
-              ),
-            ),
-          ],
-        ),
-      ),
+      // Use the side bar from sidebar_view.dart
+      drawer: const SideBarView(),
 
       body: Column(
         children: [
@@ -167,12 +114,12 @@ class _CalendarWindowState extends State<CalendarWindow> {
         ],
       ),
 
-      // Modern floating action buttons for adding events, counting, and going to "Today"
+      // Floating action buttons for adding events, counting, and going to "Today"
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: 'addEvent', // Unique tag for the Add Event button
+            heroTag: 'addEvent',
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
