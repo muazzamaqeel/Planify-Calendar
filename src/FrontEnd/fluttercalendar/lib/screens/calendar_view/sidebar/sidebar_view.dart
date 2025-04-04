@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../main_view/MainWindow.dart';
+import 'additional_views/settings_view.dart'; // Import the SettingsView
 
 class SideBarView extends StatelessWidget {
   const SideBarView({Key? key}) : super(key: key);
@@ -36,7 +37,14 @@ class SideBarView extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.settings, color: Colors.white),
             title: const Text('Settings', style: TextStyle(color: Colors.white)),
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              // Close the drawer first...
+              Navigator.pop(context);
+              // ...then show the settings overlay after a short delay.
+              Future.delayed(const Duration(milliseconds: 300), () {
+                SettingsView.showSettingsOverlay(context);
+              });
+            },
           ),
           const Spacer(),
           Padding(
