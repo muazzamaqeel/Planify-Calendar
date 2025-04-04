@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class TempRegistration extends StatefulWidget {
   const TempRegistration({super.key});
@@ -12,7 +14,8 @@ class _TempRegistrationState extends State<TempRegistration> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -20,10 +23,12 @@ class _TempRegistrationState extends State<TempRegistration> {
 
   String? _passwordStrength;
 
-  void _signUp() {
+  Future<void> _signUp() async {
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Passwords do not match!"), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text("Passwords do not match!"),
+            backgroundColor: Colors.red),
       );
       return;
     }
@@ -32,17 +37,51 @@ class _TempRegistrationState extends State<TempRegistration> {
       _isLoading = true;
     });
 
-    Future.delayed(Duration(seconds: 2), () {
+    // Build the JSON payload for the signup request.
+    final Map<String, dynamic> requestBody = {
+      "name": _fullNameController.text,
+      "username": _usernameController.text,
+      "email": _emailController.text,
+      "password": _passwordController.text,
+      "age": 22, // You can modify this if you add an age field.
+      "gender": "Other" // Modify or extend as needed.
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("http://127.0.0.1:8000/api/signup/"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
       setState(() {
         _isLoading = false;
       });
 
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("User Registered Successfully!")),
+        );
+        Navigator.pop(context);
+      } else {
+        final responseData = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData["error"] ?? "Registration failed"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("User Registered Successfully!")),
+        SnackBar(
+            content: Text("An error occurred: $e"),
+            backgroundColor: Colors.red),
       );
-
-      Navigator.pop(context);
-    });
+    }
   }
 
   @override
@@ -57,7 +96,7 @@ class _TempRegistrationState extends State<TempRegistration> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Full Name Field (Shortened Width)
+              // Full Name Field
               SizedBox(
                 width: 350,
                 child: TextField(
@@ -119,7 +158,9 @@ class _TempRegistrationState extends State<TempRegistration> {
                     filled: true,
                     fillColor: Colors.white,
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -144,7 +185,9 @@ class _TempRegistrationState extends State<TempRegistration> {
                     filled: true,
                     fillColor: Colors.white,
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: () {
                         setState(() {
                           _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -156,7 +199,7 @@ class _TempRegistrationState extends State<TempRegistration> {
               ),
               SizedBox(height: 16),
 
-              // Sign Up Button (Centered & Shortened)
+              // Sign Up Button
               SizedBox(
                 width: 200,
                 child: _isLoading
