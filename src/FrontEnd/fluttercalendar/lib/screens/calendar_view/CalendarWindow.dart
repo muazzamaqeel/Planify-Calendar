@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-
+import '../main_view/MainWindow.dart';
 import 'components/calendar_card.dart';
 import 'components/event_list.dart';
 
@@ -93,17 +93,20 @@ class _CalendarWindowState extends State<CalendarWindow> {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_today, color: Colors.white),
-              title: const Text('Calendar', style: TextStyle(color: Colors.white)),
+              title:
+                  const Text('Calendar', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.event, color: Colors.white),
-              title: const Text('Events', style: TextStyle(color: Colors.white)),
+              title:
+                  const Text('Events', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.settings, color: Colors.white),
-              title: const Text('Settings', style: TextStyle(color: Colors.white)),
+              title:
+                  const Text('Settings', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             const Spacer(),
@@ -114,6 +117,14 @@ class _CalendarWindowState extends State<CalendarWindow> {
                   backgroundColor: Colors.redAccent,
                 ),
                 onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MainWindow()),
+                    (Route<dynamic> route) =>
+                        false, // removes all previous routes
+                  );
+
                   // Example logout function
                   Navigator.popUntil(context, ModalRoute.withName('/'));
                 },
@@ -153,11 +164,11 @@ class _CalendarWindowState extends State<CalendarWindow> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: 'addEvent',
+            heroTag: 'addEvent', // Unique tag for the Add Event button from CA1234
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.orange,
           ),
           const SizedBox(height: 10),
           FloatingActionButton.extended(
