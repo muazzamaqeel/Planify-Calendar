@@ -66,10 +66,14 @@ class _CalendarWindowState extends State<CalendarWindow> {
       // Darker app bar for contrast
       appBar: GFAppBar(
         title: const Text(
-          "Modern Flutter Calendar",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.blueGrey,
+          "Planify",
+          // Making the text also bold and white for better visibility
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+            ),
+          ),
+        backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
 
@@ -83,7 +87,7 @@ class _CalendarWindowState extends State<CalendarWindow> {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  'Hello, User!',
+                  'Hello, Aida!',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
