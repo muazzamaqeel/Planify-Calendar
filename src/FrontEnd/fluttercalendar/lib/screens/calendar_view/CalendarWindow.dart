@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:fluttercalendar/widgets/calendar_card.dart';
-import 'package:fluttercalendar/widgets/event_list.dart';
 
 import '../main_view/MainWindow.dart';
+import 'components/calendar_card.dart';
+import 'components/event_list.dart';
+import 'notification_handler/NotificationsWindow.dart'; // Notifications overlay
+import 'sidebar/sidebar_view.dart'; // Side bar code
 
 class CalendarWindow extends StatefulWidget {
   const CalendarWindow({super.key});
@@ -53,59 +55,37 @@ class _CalendarWindowState extends State<CalendarWindow> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GFAppBar(
-        title: const Text("Modern Flutter Calendar"),
-        backgroundColor: Colors.deepPurple,
-      ),
-      // Sidebar navigation drawer
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.deepPurple),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  'Hello, User!',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
+        // Combined title that preserves both branches' naming
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+              "Planify",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Calendar'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.event),
-              title: const Text('Events'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainWindow()),
-                    (Route<dynamic> route) =>
-                        false, // removes all previous routes
-                  );
-                },
-                icon: const Icon(Icons.logout),
-                label: const Text('Logout'),
-              ),
+            Text(
+              "Modern Flutter Calendar",
+              style: TextStyle(fontSize: 12, color: Colors.white70),
             ),
           ],
         ),
+        backgroundColor: Colors.blue,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // Show the overlay from NotificationsWindow
+              NotificationsWindow.showNotificationOverlay(context);
+            },
+          ),
+        ],
       ),
+      // Use the side bar from sidebar_view.dart
+      drawer: const SideBarView(),
       body: Column(
         children: [
           // Calendar UI widget
