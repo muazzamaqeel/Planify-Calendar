@@ -6,9 +6,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'components/calendar_card.dart';
 import 'components/event_list.dart';
 
-
 class CalendarWindow extends StatefulWidget {
-  const CalendarWindow({super.key});
+  const CalendarWindow({Key? key}) : super(key: key);
 
   @override
   State<CalendarWindow> createState() => _CalendarWindowState();
@@ -20,53 +19,72 @@ class _CalendarWindowState extends State<CalendarWindow> {
   final Map<DateTime, List<String>> _events = {};
   int _counter = 0;
 
+  // Called when a user selects a day on the calendar
   void _onDaySelected(DateTime selectedDay) {
     setState(() {
       _selectedDay = selectedDay;
     });
   }
 
+  // Called when the user changes between Month/2-weeks/Week format
   void _onFormatChanged(CalendarFormat format) {
     setState(() {
       _calendarFormat = format;
     });
   }
 
+  // Adds a new event to the selected day
   void _addEvent() {
     setState(() {
-      if (_events[_selectedDay] == null) {
-        _events[_selectedDay] = [];
-      }
+      _events[_selectedDay] ??= [];
       _events[_selectedDay]!.add(
         "Event at ${DateFormat('hh:mm a').format(DateTime.now())}",
       );
     });
   }
 
+  // Simple counter increment
   void _incrementCounter() {
     setState(() {
       _counter++;
     });
   }
 
+  // Jump back to today's date
+  void _goToToday() {
+    setState(() {
+      _selectedDay = DateTime.now();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Subtle grey background for a modern, cohesive look
+      backgroundColor: Colors.grey[200],
+
+      // Darker app bar for contrast
       appBar: GFAppBar(
-        title: const Text("Modern Flutter Calendar"),
-        backgroundColor: Colors.deepPurple,
+        title: const Text(
+          "Modern Flutter Calendar",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.blueGrey,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      // Sidebar navigation drawer
+
+      // Dark-themed navigation drawer
       drawer: Drawer(
+        backgroundColor: Colors.blueGrey[700],
         child: Column(
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.deepPurple),
+              decoration: BoxDecoration(color: Colors.blueGrey[800]),
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
                   'Hello, User!',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
                   ),
@@ -74,38 +92,29 @@ class _CalendarWindowState extends State<CalendarWindow> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Calendar'),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              leading: const Icon(Icons.calendar_today, color: Colors.white),
+              title: const Text('Calendar', style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.event),
-              title: const Text('Events'),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              leading: const Icon(Icons.event, color: Colors.white),
+              title: const Text('Events', style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              leading: const Icon(Icons.settings, color: Colors.white),
+              title: const Text('Settings', style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
             ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                ),
                 onPressed: () {
+                  // Example logout function
                   Navigator.popUntil(context, ModalRoute.withName('/'));
                 },
                 icon: const Icon(Icons.logout),
@@ -115,6 +124,7 @@ class _CalendarWindowState extends State<CalendarWindow> {
           ],
         ),
       ),
+
       body: Column(
         children: [
           // Calendar UI widget
@@ -125,35 +135,48 @@ class _CalendarWindowState extends State<CalendarWindow> {
             onDaySelected: _onDaySelected,
             onFormatChanged: _onFormatChanged,
           ),
+
           // Event list for the selected day
           Expanded(
-            child: EventList(
-              events: _events[_selectedDay] ?? [],
+            child: Container(
+              color: Colors.grey[100],
+              child: EventList(
+                events: _events[_selectedDay] ?? [],
+              ),
             ),
           ),
         ],
       ),
-      // Floating action buttons for adding events and incrementing a counter
-        floatingActionButton: Column(
+
+      // Modern floating action buttons for adding events, counting, and going to "Today"
+      floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-            FloatingActionButton.extended(
-            heroTag: 'addEvent', // Unique tag for the Add Event button
+          FloatingActionButton.extended(
+            heroTag: 'addEvent',
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
-            backgroundColor: Colors.orange,
-            ),
-            const SizedBox(height: 10),
-            FloatingActionButton.extended(
-            heroTag: 'incrementCounter', // Unique tag for the Counter button
+            backgroundColor: Colors.deepPurple,
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            heroTag: 'incrementCounter',
             onPressed: _incrementCounter,
             label: Text("Count: $_counter"),
             icon: const Icon(Icons.add_circle_outline),
             backgroundColor: Colors.deepPurple,
-            ),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            heroTag: 'goToToday',
+            onPressed: _goToToday,
+            label: const Text("Today"),
+            icon: const Icon(Icons.today),
+            backgroundColor: Colors.deepPurple,
+          ),
         ],
-        ),
+      ),
     );
   }
 }
