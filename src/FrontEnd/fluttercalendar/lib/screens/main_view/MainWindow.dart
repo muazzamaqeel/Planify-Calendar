@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'TempRegistration.dart'; // Import the Sign-Up Page
+import 'TempRegistration.dart'; // Sign-Up Page
+import '../calendar_view/CalendarWindow.dart'; // Calendar view screen
 
 class MainWindow extends StatefulWidget {
   const MainWindow({super.key});
@@ -14,37 +15,29 @@ class _MainWindowState extends State<MainWindow> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isSignUpMode = false;
   bool _obscurePassword = true;
-
   final String _baseUrl = "http://localhost:8000/api";
   String _statusMessage = '';
   Color _statusColor = Colors.transparent;
 
+  // Toggle visibility of the password
   void _togglePasswordVisibility() {
     setState(() {
       _obscurePassword = !_obscurePassword;
     });
   }
 
+  // Navigate to the Sign-Up page
   void _navigateToSignUp() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TempRegistration()),
+      MaterialPageRoute(builder: (context) => const TempRegistration()),
     );
   }
 
-  String? _validateEmail(String email) {
-    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-        .hasMatch(email)) {
-      return "Enter a valid email address";
-    }
-    return null;
-  }
-
-  // ✅ Fixed `_authenticateUser()`
-  Future<void> _authenticateUser() async {
-    const endpoint = 'signup/';
+  // Function to validate user credentials (login)
+  Future<void> _validateUser() async {
+    const endpoint = 'validate_user/';
 
     setState(() {
       _statusMessage = '';
@@ -66,55 +59,22 @@ class _MainWindowState extends State<MainWindow> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        setState(() {
-          _statusMessage = data['message'] ?? 'Sign Up Successful';
-          _statusColor = Colors.green;
-        });
-      } else {
-        setState(() {
-          _statusMessage = "Error: ${response.statusCode} - ${response.body}";
-          _statusColor = Colors.red;
-        });
-      }
-    } catch (error) {
-      setState(() {
-        _statusMessage = "Network Error: $error";
-        _statusColor = Colors.red;
-      });
-    } // ✅ Missing bracket added here
-  }
-
-  // ✅ Fixed `_validateUser()`
-  Future<void> _validateUser() async {
-    const endpoint = 'validate_user/';
-
-    setState(() {
-      _statusMessage = '';
-      _statusColor = Colors.transparent;
-    });
-
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Call Made")));
-
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/$endpoint'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email_or_username': _usernameController.text, // ✅ Fixed field name
-          'password': _passwordController.text,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _statusMessage = data['message'] == 'Login successful'
-              ? "User Successfully Verified"
-              : data['message'] ?? 'Unknown response';
-          _statusColor =
-              data['message'] == 'Login successful' ? Colors.green : Colors.red;
-        });
+        if (data['message'] == 'Login successful') {
+          setState(() {
+            _statusMessage = "User Successfully Verified";
+            _statusColor = Colors.green;
+          });
+          // Navigate to CalendarWindow after successful login
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const CalendarWindow()),
+          );
+        } else {
+          setState(() {
+            _statusMessage = data['message'] ?? 'Unknown response';
+            _statusColor = Colors.red;
+          });
+        }
       } else {
         setState(() {
           _statusMessage = "Error: ${response.statusCode} - ${response.body}";
@@ -129,7 +89,7 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  // ✅ Unchanged `_connectWithBackend()`
+  // Example function to connect with your backend (GET request)
   Future<void> _connectWithBackend() async {
     try {
       final response = await http.get(
@@ -170,10 +130,10 @@ class _MainWindowState extends State<MainWindow> {
                 const SizedBox(height: 24),
                 TextField(
                   controller: _usernameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email or Username',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: const OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -182,12 +142,11 @@ class _MainWindowState extends State<MainWindow> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility),
+                      icon: Icon(
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility),
                       onPressed: _togglePasswordVisibility,
                     ),
                   ),
@@ -198,9 +157,20 @@ class _MainWindowState extends State<MainWindow> {
                     _statusMessage,
                     style: TextStyle(color: _statusColor),
                   ),
-                FilledButton(
-                  onPressed: _validateUser,
-                  child: const Text("SIGN IN"),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FilledButton(
+                      onPressed: _validateUser,
+                      child: const Text("SIGN IN"),
+                    ),
+                    const SizedBox(width: 16),
+                    TextButton(
+                      onPressed: _navigateToSignUp,
+                      child: const Text("SIGN UP"),
+                    ),
+                  ],
                 ),
               ],
             ),
