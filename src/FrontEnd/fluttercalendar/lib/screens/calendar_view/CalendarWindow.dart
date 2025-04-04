@@ -119,14 +119,10 @@ class _CalendarWindowState extends State<CalendarWindow> {
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const MainWindow()),
-                    (Route<dynamic> route) =>
-                        false, // removes all previous routes
+                    MaterialPageRoute(builder: (context) => const MainWindow()),
+                    (Route<dynamic> route) => false, // removes all previous routes
                   );
-
-                  // Example logout function
-                  Navigator.popUntil(context, ModalRoute.withName('/'));
+                  // Removed Navigator.popUntil call as it causes error when the route stack is empty.
                 },
                 icon: const Icon(Icons.logout),
                 label: const Text('Logout'),
