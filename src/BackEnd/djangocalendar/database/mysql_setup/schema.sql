@@ -4,7 +4,8 @@ CREATE DATABASE IF NOT EXISTS PlanifyDB;
 -- Use the schema
 USE PlanifyDB;
 
--- Drop the table if it exists
+-- Drop the 'persons' table if it exists
+DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS persons;
 
 -- Create the 'persons' table
@@ -27,17 +28,22 @@ VALUES
     ('Tom', 'tom', 12, 'Male', 'tom@example.com', '1234'),
     ('David', 'david', 12, 'Male', 'david@example.com', '1234');
 
--- Drop the table if it exists
-DROP TABLE IF EXISTS evels;
-
--- Create the 'evels' table with specified attributes
-CREATE TABLE evels (
+-- Create the 'events' table
+CREATE TABLE events (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name_event VARCHAR(255) NOT NULL,
-    date DATE NOT NULL,
+    user_id INT NOT NULL,
+    event_name VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    location VARCHAR(255) NOT NULL,
-    remindar VARCHAR(255) NOT NULL,
-    attachements TEXT
+    description TEXT,
+    location VARCHAR(255),
+    tag VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Foreign key to link with the 'persons' table
+    FOREIGN KEY (user_id) REFERENCES persons(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB;
