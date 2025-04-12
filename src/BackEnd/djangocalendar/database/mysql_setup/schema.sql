@@ -1,3 +1,9 @@
+-- Create schema if it doesn't exist
+CREATE DATABASE IF NOT EXISTS PlanifyDB;
+
+-- Use the schema
+USE PlanifyDB;
+
 -- Drop the table if it exists
 DROP TABLE IF EXISTS persons;
 
