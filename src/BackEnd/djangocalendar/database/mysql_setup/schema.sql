@@ -1,7 +1,11 @@
--- Drop the table if it exists
+USE PlanifyDB;
+
+-- Drop all old tables if they exist
+DROP TABLE IF EXISTS evels;
+DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS persons;
 
--- Create the 'persons' table
+-- Create 'persons'
 CREATE TABLE persons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -13,7 +17,7 @@ CREATE TABLE persons (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Insert sample data into the 'persons' table
+-- Insert demo data
 INSERT INTO persons (name, username, age, gender, email, password)
 VALUES
     ('Aida', 'aida', 12, 'Female', 'aida@example.com', '1234'),
@@ -21,17 +25,20 @@ VALUES
     ('Tom', 'tom', 12, 'Male', 'tom@example.com', '1234'),
     ('David', 'david', 12, 'Male', 'david@example.com', '1234');
 
--- Drop the table if it exists
-DROP TABLE IF EXISTS evels;
-
--- Create the 'evels' table with specified attributes
-CREATE TABLE evels (
+-- Create 'events'
+CREATE TABLE events (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name_event VARCHAR(255) NOT NULL,
-    date DATE NOT NULL,
+    user_id INT NOT NULL,
+    event_name VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    location VARCHAR(255) NOT NULL,
-    remindar VARCHAR(255) NOT NULL,
-    attachements TEXT
+    description TEXT,
+    location VARCHAR(255),
+    tag VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES persons(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB;
