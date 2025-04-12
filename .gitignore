@@ -1,9 +1,9 @@
-# Ignore all __pycache__ directories
-__pycache__/
-**/__pycache__/
-
-# Ignore all compiled Python files
+# Ignore all Python bytecode
 *.pyc
 *.pyo
 *.pyd
 *.cpython-*
+
+# Ignore all __pycache__ folders
+__pycache__/
+**/__pycache__/
