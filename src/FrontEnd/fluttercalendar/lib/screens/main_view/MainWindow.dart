@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'TempRegistration.dart'; // Sign-Up Page
+import 'UserRegistration.dart'; // Sign-Up Page
 import '../calendar_view/CalendarWindow.dart'; // Calendar view screen
 
 class MainWindow extends StatefulWidget {
@@ -31,7 +31,7 @@ class _MainWindowState extends State<MainWindow> {
   void _navigateToSignUp() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const TempRegistration()),
+      MaterialPageRoute(builder: (context) => const UserRegistration()),
     );
   }
 

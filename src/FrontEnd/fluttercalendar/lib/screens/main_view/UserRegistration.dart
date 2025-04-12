@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class TempRegistration extends StatefulWidget {
-  const TempRegistration({super.key});
+class UserRegistration extends StatefulWidget {
+  const UserRegistration({super.key});
 
   @override
-  _TempRegistrationState createState() => _TempRegistrationState();
+  _UserRegistrationState createState() => _UserRegistrationState();
 }
 
-class _TempRegistrationState extends State<TempRegistration> {
+class _UserRegistrationState extends State<UserRegistration> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
