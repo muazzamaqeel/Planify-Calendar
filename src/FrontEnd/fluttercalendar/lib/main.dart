@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/main_view/MainWindow.dart';
 import 'screens/calendar_view/CalendarWindow.dart';
 import 'screens/main_view/UserRegistration.dart';
-import '../screens/calendar_view/components/theme_notifier.dart';
+import '../screens/calendar_view/components/ThemeNotifier.dart';
 import 'package:provider/provider.dart';
 
 void main() {

@@ -3,8 +3,8 @@ import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../widgets/calendar_card.dart';
-import '../../widgets/event_list.dart';
+import '../../widgets/CalendarCard.dart';
+import '../../widgets/EventList.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});

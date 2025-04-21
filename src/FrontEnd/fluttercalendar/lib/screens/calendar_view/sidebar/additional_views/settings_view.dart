@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../components/theme_notifier.dart';
+import '../../components/ThemeNotifier.dart';
 
 class SettingsView {
   /// Displays an overlay with a modern settings interface containing several options.

@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../main_view/MainWindow.dart';
-import 'components/calendar_card.dart';
-import 'components/event_list.dart';
+import 'components/CalendarCard.dart';
+import 'components/EventList.dart';
 import 'notification_handler/NotificationsWindow.dart'; // Notifications overlay
 import 'sidebar/sidebar_view.dart'; // Side bar code
 
