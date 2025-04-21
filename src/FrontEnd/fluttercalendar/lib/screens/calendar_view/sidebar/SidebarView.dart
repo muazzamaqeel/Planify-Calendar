@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../main_view/MainWindow.dart';
-import 'additional_views/settings_view.dart'; // Import the SettingsView
+import 'additional_views/SettingsView.dart'; // Import the SettingsView
 
 class SideBarView extends StatelessWidget {
   const SideBarView({Key? key}) : super(key: key);

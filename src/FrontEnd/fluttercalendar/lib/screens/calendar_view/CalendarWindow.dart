@@ -7,7 +7,7 @@ import '../main_view/MainWindow.dart';
 import 'components/CalendarCard.dart';
 import 'components/EventList.dart';
 import 'notification_handler/NotificationsWindow.dart'; // Notifications overlay
-import 'sidebar/sidebar_view.dart'; // Side bar code
+import 'sidebar/SidebarView.dart'; // Side bar code
 
 class CalendarWindow extends StatefulWidget {
   const CalendarWindow({super.key});
@@ -84,7 +84,7 @@ class _CalendarWindowState extends State<CalendarWindow> {
           ),
         ],
       ),
-      // Use the side bar from sidebar_view.dart
+      // Use the side bar from SidebarView.dart
       drawer: const SideBarView(),
       body: Column(
         children: [
