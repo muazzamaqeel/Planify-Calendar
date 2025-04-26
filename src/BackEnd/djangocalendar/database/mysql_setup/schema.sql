@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS PlanifyDB;
+
 USE PlanifyDB;
 
 -- Drop all old tables if they exist
