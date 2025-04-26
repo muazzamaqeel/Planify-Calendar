@@ -1,12 +1,17 @@
+// File: screens/calendar_view/components/MiniCalendar.dart
+
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MiniCalendar extends StatelessWidget {
-  /// The month the mini calendar should show
+  /// The month the mini-calendar should show
   final DateTime focusedDay;
 
   /// Called when the user taps a date
   final void Function(DateTime selectedDay) onDateSelected;
+
+  /// Called when the mini-calendar page (month) changes
+  final void Function(DateTime newFocusedMonth) onMonthChanged;
 
   /// Called when the top “✕” is pressed
   final VoidCallback onClose;
@@ -15,6 +20,7 @@ class MiniCalendar extends StatelessWidget {
     Key? key,
     required this.focusedDay,
     required this.onDateSelected,
+    required this.onMonthChanged,
     required this.onClose,
   }) : super(key: key);
 
@@ -57,15 +63,13 @@ class MiniCalendar extends StatelessWidget {
                     const TextStyle(color: Colors.white, fontSize: 16),
                     decoration: BoxDecoration(
                       color: Colors.grey[850],
-                      borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(12)),
                     ),
                   ),
                   calendarStyle: CalendarStyle(
-                    defaultTextStyle:
-                    const TextStyle(color: Colors.white70),
-                    weekendTextStyle:
-                    const TextStyle(color: Colors.redAccent),
+                    defaultTextStyle: const TextStyle(color: Colors.white70),
+                    weekendTextStyle: const TextStyle(color: Colors.redAccent),
                     todayDecoration: const BoxDecoration(
                       color: Colors.orange,
                       shape: BoxShape.circle,
@@ -76,8 +80,14 @@ class MiniCalendar extends StatelessWidget {
                     ),
                     outsideDaysVisible: false,
                   ),
-                  selectedDayPredicate: (day) =>
-                      isSameDay(day, focusedDay),
+                  selectedDayPredicate: (day) => isSameDay(day, focusedDay),
+
+                  // when the user swipes or taps the chevrons in the mini-calendar
+                  onPageChanged: (newFocusedDay) {
+                    onMonthChanged(newFocusedDay);
+                  },
+
+                  // tapping a day
                   onDaySelected: (selected, _) {
                     onDateSelected(selected);
                   },
@@ -153,18 +163,15 @@ class MiniCalendar extends StatelessWidget {
       value: value,
       onChanged: (_) {},
       activeColor: Colors.orangeAccent,
-      title: Text(label,
-          style: const TextStyle(color: Colors.white70)),
+      title: Text(label, style: const TextStyle(color: Colors.white70)),
       controlAffinity: ListTileControlAffinity.leading,
     );
   }
 
   Widget _buildCategory(String name) {
     return ListTile(
-      leading: const Icon(Icons.label_outline,
-          color: Colors.white70),
-      title: Text(name,
-          style: const TextStyle(color: Colors.white70)),
+      leading: const Icon(Icons.label_outline, color: Colors.white70),
+      title: Text(name, style: const TextStyle(color: Colors.white70)),
     );
   }
 }

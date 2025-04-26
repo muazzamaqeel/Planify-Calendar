@@ -1,13 +1,12 @@
-// lib/screens/calendar_view/calendar_window.dart
+// File: screens/calendar_view/CalendarWindow.dart
 
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'sidebar/SidebarView.dart';
-import 'components/MiniCalendar.dart';  // your new mini-calendar component
+import 'components/MiniCalendar.dart';
 
 // Simple Meeting class & DataSource
 class Meeting {
@@ -19,15 +18,10 @@ class Meeting {
 
 class MeetingDataSource extends CalendarDataSource {
   MeetingDataSource(List<Meeting> source) { appointments = source; }
-
-  @override
-  DateTime getStartTime(int index) => appointments![index].from;
-  @override
-  DateTime getEndTime(int index)   => appointments![index].to;
-  @override
-  String getSubject(int index)     => appointments![index].title;
-  @override
-  Color  getColor(int index)       => appointments![index].color;
+  @override DateTime getStartTime(int i) => appointments![i].from;
+  @override DateTime getEndTime(int i)   => appointments![i].to;
+  @override String   getSubject(int i)   => appointments![i].title;
+  @override Color    getColor(int i)     => appointments![i].color;
 }
 
 class CalendarWindow extends StatefulWidget {
@@ -37,36 +31,44 @@ class CalendarWindow extends StatefulWidget {
 }
 
 class _CalendarWindowState extends State<CalendarWindow> {
-  // scaffold key so we can open/close both drawers
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _sfController = CalendarController();
 
-  // controller for the main Syncfusion calendar
-  final CalendarController _sfController = CalendarController();
-
-  // what month mini-calendar is showing
   DateTime _miniFocused = DateTime.now();
 
-  // month/week/day
+  // Map the 3 segments → these views:
+  static const List<CalendarView> _views = [
+    CalendarView.month, // Month grid
+    CalendarView.week,  // Vertical week (7 days across)
+    CalendarView.day,   // Day timeline
+  ];
+
+  // Start in “Week” by default
   CalendarView _currentView = CalendarView.week;
 
-  // some sample meetings
-  late MeetingDataSource _dataSource;
+  late final MeetingDataSource _dataSource;
   final _meetings = [
-    Meeting("UX Review", DateTime.now().subtract(const Duration(hours:1)),
-        DateTime.now().add(const Duration(hours:1)),
-        Colors.purpleAccent),
-    Meeting("Standup",   DateTime.now().add(const Duration(hours:2)),
-        DateTime.now().add(const Duration(hours:3)),
-        Colors.teal),
+    Meeting(
+      "UX Review",
+      DateTime.now().subtract(const Duration(hours: 1)),
+      DateTime.now().add(const Duration(hours: 1)),
+      Colors.purpleAccent,
+    ),
+    Meeting(
+      "Standup",
+      DateTime.now().add(const Duration(hours: 2)),
+      DateTime.now().add(const Duration(hours: 3)),
+      Colors.teal,
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
     _dataSource = MeetingDataSource(_meetings);
+    _sfController.view = _currentView;
   }
 
-  // show details when tapping an appointment
   void _onSfTap(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.appointment &&
         details.appointments != null) {
@@ -89,173 +91,133 @@ class _CalendarWindowState extends State<CalendarWindow> {
     }
   }
 
+  void _jumpTo(DateTime date) {
+    setState(() {
+      _sfController.displayDate = date;
+      _miniFocused = date;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
 
-      // <-- left drawer
       drawer: const SideBarView(),
 
-      // top bar with hamburger + notifications + calendar icon
       appBar: GFAppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text("Planify",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold
-                )),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             Text("Modern Flutter Calendar",
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12
-                )),
+                style: TextStyle(color: Colors.white70, fontSize: 12)),
           ],
         ),
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
-        // hamburger is automatic, these are extra action buttons:
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // your NotificationsWindow.showNotificationOverlay(context);
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: const Icon(Icons.calendar_today),
-            onPressed: () =>
-                _scaffoldKey.currentState!.openEndDrawer(),
+            onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
           ),
         ],
       ),
 
-      // <-- right drawer = mini-calendar
       endDrawer: MiniCalendar(
         focusedDay: _miniFocused,
-        onDateSelected: (DateTime day) {
-          setState(() {
-            _miniFocused = day;
-            // jump the SfCalendar to this date:
-            _sfController.displayDate = day;
-          });
-          Navigator.of(context).pop(); // close the endDrawer
+        onDateSelected: (day) {
+          _jumpTo(day);
+          Navigator.of(context).pop();
         },
-        onClose: () {
-          Navigator.of(context).pop(); // close the endDrawer
-        },
+        onMonthChanged: (month) => _jumpTo(month),
+        onClose: () => Navigator.of(context).pop(),
       ),
 
-      // main content
       body: Column(
         children: [
-          // gradient header + month navigation + toggles
           Container(
             margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.symmetric(
-                horizontal: 24, vertical: 16
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFE3F2FD),
-                  Color(0xFFF1F8E9),
-                ],
+                colors: [Color(0xFFE3F2FD), Color(0xFFF1F8E9)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 8,
-                  offset: Offset(0,4),
-                )
+                BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))
               ],
             ),
             child: Row(
               children: [
                 Text(
                   DateFormat.yMMMM().format(_miniFocused),
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold
-                  ),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () {
-                    _sfController.displayDate = DateTime.now();
-                  },
+                  onPressed: () => _jumpTo(DateTime.now()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  child: const Text("Today",
-                      style: TextStyle(color: Colors.deepPurple)
-                  ),
+                  child: const Text("Today", style: TextStyle(color: Colors.deepPurple)),
                 ),
                 const SizedBox(width: 24),
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   onPressed: () {
                     final cur = _sfController.displayDate ?? DateTime.now();
-                    _sfController.displayDate =
-                        DateTime(cur.year, cur.month - 1, 1);
+                    _jumpTo(DateTime(cur.year, cur.month - 1, 1));
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   onPressed: () {
                     final cur = _sfController.displayDate ?? DateTime.now();
-                    _sfController.displayDate =
-                        DateTime(cur.year, cur.month + 1, 1);
+                    _jumpTo(DateTime(cur.year, cur.month + 1, 1));
                   },
                 ),
                 const Spacer(),
-                ToggleButtons(
-                  borderRadius: BorderRadius.circular(20),
-                  fillColor: Colors.deepPurple,
-                  selectedColor: Colors.white,
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal:12),
-                      child: Text("Month"),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal:12),
-                      child: Text("Week"),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal:12),
-                      child: Text("Day"),
-                    ),
-                  ],
-                  isSelected: [
-                    _currentView == CalendarView.month,
-                    _currentView == CalendarView.week,
-                    _currentView == CalendarView.day,
-                  ],
-                  onPressed: (idx) {
-                    setState(() {
-                      _currentView = [
-                        CalendarView.month,
-                        CalendarView.week,
-                        CalendarView.day
-                      ][idx];
-                    });
-                  },
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: ToggleButtons(
+                    borderWidth: 0,
+                    borderRadius: BorderRadius.circular(24),
+                    fillColor: Colors.deepPurple,
+                    selectedColor: Colors.white,
+                    color: Colors.black87,
+                    constraints: const BoxConstraints(minWidth: 60, minHeight: 36),
+                    children: const [
+                      Text("Month"),
+                      Text("Week"),
+                      Text("Day"),
+                    ],
+                    isSelected: _views.map((v) => v == _currentView).toList(),
+                    onPressed: (idx) {
+                      setState(() {
+                        _currentView = _views[idx];
+                        _sfController.view = _currentView;
+                      });
+                    },
+                  ),
                 ),
               ],
             ),
           ),
 
-          // the Syncfusion calendar
           Expanded(
             child: SfCalendar(
               controller: _sfController,
@@ -267,7 +229,7 @@ class _CalendarWindowState extends State<CalendarWindow> {
               timeSlotViewSettings: const TimeSlotViewSettings(
                 startHour: 6,
                 endHour: 20,
-                timeInterval: Duration(minutes:30),
+                timeInterval: Duration(minutes: 30),
               ),
               onTap: _onSfTap,
               firstDayOfWeek: 1,
