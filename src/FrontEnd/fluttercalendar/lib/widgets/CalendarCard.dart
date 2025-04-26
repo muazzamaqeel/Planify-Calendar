@@ -1,69 +1,72 @@
-import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
-import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
-
-class CalendarCard extends StatelessWidget {
-  final DateTime selectedDay;
-  final CalendarFormat calendarFormat;
-  final Map<DateTime, List<String>> events;
-  final ValueChanged<DateTime> onDaySelected;
-  final ValueChanged<CalendarFormat> onFormatChanged;
-
-  const CalendarCard({
-    super.key,
-    required this.selectedDay,
-    required this.calendarFormat,
-    required this.events,
-    required this.onDaySelected,
-    required this.onFormatChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: GFCard(
-        boxFit: BoxFit.cover,
-        title: GFListTile(
-          avatar: const GFAvatar(
-            backgroundColor: Colors.blue,
-            child: Icon(Icons.calendar_today, color: Colors.white),
-          ),
-          title: Text(
-            "Selected Date: ${DateFormat('yMMMMd').format(selectedDay)}",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          subTitle: Text(
-            "Tap on a date to add events",
-            style: TextStyle(color: Colors.grey.shade700),
-          ),
-        ),
-        content: TableCalendar(
-          focusedDay: selectedDay,
-          firstDay: DateTime.utc(2000, 1, 1),
-          lastDay: DateTime.utc(2100, 12, 31),
-          calendarFormat: calendarFormat,
-          selectedDayPredicate: (day) => isSameDay(day, selectedDay),
-          onDaySelected: (selected, focused) => onDaySelected(selected),
-          onFormatChanged: onFormatChanged,
-          eventLoader: (day) => events[day] ?? [],
-          calendarStyle: CalendarStyle(
-            todayDecoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-            selectedDecoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-            markerDecoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+--- a/lib/screens/calendar_view/components/CalendarCard.dart
++++ b/lib/screens/calendar_view/components/CalendarCard.dart
+@@ Widget build(BuildContext context) {
+-    return Card(
+-      color: Colors.white,
+-      elevation: 4,
+-      margin: const EdgeInsets.all(16),
++    return Card(
++      // now uses CardTheme from AppTheme
+child: TableCalendar(
+@@
+-        headerStyle: HeaderStyle(
+-          titleCentered: true,
+-          formatButtonVisible: true,
+-          formatButtonDecoration: BoxDecoration(
+-            color: Colors.deepPurple,
+-            borderRadius: BorderRadius.circular(8.0),
+-          ),
+-          formatButtonTextStyle: const TextStyle(color: Colors.white),
+-          titleTextStyle: const TextStyle(
+-            color: Colors.black87,
+-            fontWeight: FontWeight.bold,
+-          ),
+-          leftChevronIcon: const Icon(Icons.chevron_left, color: Colors.black54),
+-          rightChevronIcon: const Icon(Icons.chevron_right, color: Colors.black54),
+-        ),
++        headerStyle: HeaderStyle(
++          titleCentered: true,
++          formatButtonVisible: true,
++          formatButtonDecoration: BoxDecoration(
++            color: Theme.of(context).colorScheme.secondary,
++            borderRadius: AppShapes.cardRadius,
++          ),
++          formatButtonTextStyle: Theme.of(context).textTheme.bodyText1!
++            .copyWith(color: Theme.of(context).colorScheme.onSecondary),
++          titleTextStyle: Theme.of(context).textTheme.headline2!,
++          leftChevronIcon: Icon(Icons.chevron_left,
++            color: Theme.of(context).colorScheme.onBackground),
++          rightChevronIcon: Icon(Icons.chevron_right,
++            color: Theme.of(context).colorScheme.onBackground),
++        ),
+@@
+-        calendarStyle: CalendarStyle(
+-          outsideDaysVisible: false,
+-          todayDecoration: BoxDecoration(
+-            color: Colors.blueGrey.shade200,
+-            shape: BoxShape.circle,
+-          ),
+-          todayTextStyle: const TextStyle(color: Colors.black),
+-          selectedDecoration: const BoxDecoration(
+-            color: Colors.deepPurple,
+-            shape: BoxShape.circle,
+-          ),
+-          selectedTextStyle: const TextStyle(color: Colors.white),
+-          weekendTextStyle: const TextStyle(color: Colors.redAccent),
+-        ),
++        calendarStyle: CalendarStyle(
++          outsideDaysVisible: false,
++          todayDecoration: BoxDecoration(
++            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
++            shape: BoxShape.circle,
++          ),
++          todayTextStyle: Theme.of(context).textTheme.bodyText1!,
++          selectedDecoration: BoxDecoration(
++            color: Theme.of(context).colorScheme.primary,
++            shape: BoxShape.circle,
++          ),
++          selectedTextStyle: TextStyle(
++            color: Theme.of(context).colorScheme.onPrimary),
++          weekendTextStyle: TextStyle(
++            color: Theme.of(context).colorScheme.error),
++        ),

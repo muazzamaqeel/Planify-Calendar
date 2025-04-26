@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 
 class UserRegistration extends StatefulWidget {
-  const UserRegistration({Key? key}) : super(key: key);
+  const UserRegistration({super.key});
 
   @override
   _UserRegistrationState createState() => _UserRegistrationState();
