@@ -5,7 +5,7 @@ class ThemeNotifier extends ChangeNotifier {
   bool isDarkMode = false;
 
   ThemeNotifier() {
-    loadTheme(); // Load saved theme
+    loadTheme();
   }
 
   ThemeMode get currentTheme => isDarkMode ? ThemeMode.dark : ThemeMode.light;

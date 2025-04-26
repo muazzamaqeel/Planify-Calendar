@@ -3,24 +3,28 @@ import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../main_view/MainWindow.dart';
-import 'components/CalendarCard.dart';
-import 'components/EventList.dart';
-import 'notification_handler/NotificationsWindow.dart'; // Notifications overlay
-import 'sidebar/SidebarView.dart'; // Side bar code
+import '../../widgets/CalendarCard.dart';
+import '../../widgets/EventList.dart';
 
-class CalendarWindow extends StatefulWidget {
-  const CalendarWindow({super.key});
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+  final String title;
 
   @override
-  State<CalendarWindow> createState() => _CalendarWindowState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _CalendarWindowState extends State<CalendarWindow> {
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
   DateTime _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final Map<DateTime, List<String>> _events = {};
-  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
 
   void _onDaySelected(DateTime selectedDay) {
     setState(() {
@@ -45,50 +49,16 @@ class _CalendarWindowState extends State<CalendarWindow> {
     });
   }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GFAppBar(
-        // Combined title that preserves both branches' naming
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              "Planify",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              "Modern Flutter Calendar",
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Show the overlay from NotificationsWindow
-              NotificationsWindow.showNotificationOverlay(context);
-            },
-          ),
-        ],
+        title: Text(widget.title),
+        backgroundColor: Colors.deepPurple,
       ),
-      // Use the side bar from SidebarView.dart
-      drawer: const SideBarView(),
       body: Column(
         children: [
-          // Calendar UI widget
+          // Calendar UI
           CalendarCard(
             selectedDay: _selectedDay,
             calendarFormat: _calendarFormat,
@@ -96,7 +66,7 @@ class _CalendarWindowState extends State<CalendarWindow> {
             onDaySelected: _onDaySelected,
             onFormatChanged: _onFormatChanged,
           ),
-          // Event list for the selected day
+          // Event List UI
           Expanded(
             child: EventList(
               events: _events[_selectedDay] ?? [],
@@ -104,12 +74,11 @@ class _CalendarWindowState extends State<CalendarWindow> {
           ),
         ],
       ),
-      // Floating action buttons for adding events and incrementing a counter
+      // Floating Action Buttons
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: 'addEvent', // Unique tag for the Add Event button
             onPressed: _addEvent,
             label: const Text("Add Event"),
             icon: const Icon(Icons.add),
@@ -117,7 +86,6 @@ class _CalendarWindowState extends State<CalendarWindow> {
           ),
           const SizedBox(height: 10),
           FloatingActionButton.extended(
-            heroTag: 'incrementCounter', // Unique tag for the Counter button
             onPressed: _incrementCounter,
             label: Text("Count: $_counter"),
             icon: const Icon(Icons.add_circle_outline),

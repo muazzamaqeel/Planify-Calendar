@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/main_view/MainWindow.dart';
 import 'screens/calendar_view/CalendarWindow.dart';
-import 'screens/main_view/TempRegistration.dart';
-import '../screens/calendar_view/components/theme_notifier.dart';
+import 'screens/main_view/UserRegistration.dart';
+import '../screens/calendar_view/components/ThemeNotifier.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       home: const MainWindow(),
       routes: {
         '/calendar': (context) => const CalendarWindow(),
-        '/signup': (context) => const TempRegistration(),
+        '/signup': (context) => const UserRegistration(),
       },
     );
   }
