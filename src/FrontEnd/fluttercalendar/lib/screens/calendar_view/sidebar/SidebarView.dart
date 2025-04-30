@@ -3,7 +3,7 @@ import '../../main_view/MainWindow.dart';
 import 'additional_views/SettingsView.dart';
 
 class SideBarView extends StatelessWidget {
-  const SideBarView({Key? key}) : super(key: key);
+  const SideBarView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class SideBarView extends StatelessWidget {
                       label: 'Settings',
                       onTap: () {
                         Navigator.pop(context);
-                        Future.delayed(const Duration(milliseconds: 300), () {
+                        Future.delayed(const Duration(milliseconds: 50), () {
                           SettingsView.showSettingsOverlay(context);
                         });
                       },
@@ -79,12 +79,12 @@ class SideBarView extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.logout, color: Colors.deepPurpleAccent),
+                      Icon(Icons.logout, color: Colors.green),
                       SizedBox(width: 8),
                       Text(
                         'Logout',
                         style: TextStyle(
-                          color: Colors.deepPurpleAccent,
+                          color: Colors.green,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -109,7 +109,7 @@ class SideBarView extends StatelessWidget {
       child: ListTile(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         tileColor: const Color(0xFF2A2A3D),
-        leading: Icon(icon, color: Colors.deepPurpleAccent),
+        leading: Icon(icon, color: Colors.indigo),
         title: Text(
           label,
           style: const TextStyle(color: Colors.white70),

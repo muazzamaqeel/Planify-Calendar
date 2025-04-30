@@ -12,12 +12,12 @@ class MiniCalendar extends StatelessWidget {
   final VoidCallback onClose;
 
   const MiniCalendar({
-    Key? key,
+    super.key,
     required this.focusedDay,
     required this.onDateSelected,
     required this.onMonthChanged,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class MiniCalendar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple,
+                      color: Colors.indigo,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(8),
@@ -74,11 +74,11 @@ class MiniCalendar extends StatelessWidget {
                     defaultTextStyle: TextStyle(color: Colors.white70),
                     weekendTextStyle: TextStyle(color: Colors.redAccent),
                     todayDecoration: BoxDecoration(
-                      color: Colors.deepPurple,
+                      color: Colors.indigo,
                       shape: BoxShape.circle,
                     ),
                     selectedDecoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Colors.indigo,
                       shape: BoxShape.circle,
                     ),
                     outsideDaysVisible: false,
@@ -101,63 +101,13 @@ class MiniCalendar extends StatelessWidget {
                   customBorder: CircleBorder(),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple,
+                      color: Colors.indigo,
                       shape: BoxShape.circle,
                     ),
                     padding: const EdgeInsets.all(12),
                     child: Icon(Icons.add, color: Colors.white, size: 28),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Sections
-              _buildSection(
-                title: "My Calendars",
-                children: [
-                  _buildToggle("Daily Tasks", true),
-                  _buildToggle("Birthdays", false),
-                  _buildToggle("Tasks", true),
-                ],
-              ),
-              _buildSection(
-                title: "Favorites",
-                children: [
-                  Text(
-                    "— None —",
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                ],
-              ),
-              _buildSection(
-                title: "Categories",
-                children: [
-                  _buildCategory("Work"),
-                  _buildCategory("Personal"),
-                  _buildCategory("Education"),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Avatars row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (final url in [
-                    'https://i.pravatar.cc/100?img=5',
-                    'https://i.pravatar.cc/100?img=6',
-                    'https://i.pravatar.cc/100?img=7',
-                  ])
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundImage: NetworkImage(url),
-                      ),
-                    ),
-                ],
               ),
             ],
           ),
@@ -166,55 +116,6 @@ class MiniCalendar extends StatelessWidget {
     );
   }
 
-  Widget _buildSection({required String title, required List<Widget> children}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Color(0xFF2A2A3D),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ExpansionTile(
-        title: Text(
-          title,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        iconColor: Colors.white70,
-        collapsedIconColor: Colors.white70,
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: children,
-      ),
-    );
-  }
 
-  Widget _buildToggle(String label, bool value) {
-    return Row(
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: (_) {},
-          activeColor: Colors.deepPurpleAccent,
-          fillColor: MaterialStateProperty.all(Colors.white),
-        ),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(color: Colors.white70),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildCategory(String name) {
-    return Row(
-      children: [
-        Icon(Icons.label_outline, color: Colors.white70, size: 20),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(name, style: TextStyle(color: Colors.white70)),
-        ),
-      ],
-    );
-  }
 }

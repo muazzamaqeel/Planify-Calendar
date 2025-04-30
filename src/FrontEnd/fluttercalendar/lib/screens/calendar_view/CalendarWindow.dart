@@ -25,7 +25,7 @@ class MeetingDataSource extends CalendarDataSource {
 }
 
 class CalendarWindow extends StatefulWidget {
-  const CalendarWindow({Key? key}) : super(key: key);
+  const CalendarWindow({super.key});
   @override
   State<CalendarWindow> createState() => _CalendarWindowState();
 }
@@ -111,11 +111,11 @@ class _CalendarWindowState extends State<CalendarWindow> {
           children: const [
             Text("Planify",
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            Text("Modern Flutter Calendar",
+            Text("Everything at one Place",
                 style: TextStyle(color: Colors.white70, fontSize: 12)),
           ],
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.black87,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
@@ -196,15 +196,10 @@ class _CalendarWindowState extends State<CalendarWindow> {
                   child: ToggleButtons(
                     borderWidth: 0,
                     borderRadius: BorderRadius.circular(24),
-                    fillColor: Colors.deepPurple,
+                    fillColor: Colors.indigo,
                     selectedColor: Colors.white,
                     color: Colors.black87,
                     constraints: const BoxConstraints(minWidth: 60, minHeight: 36),
-                    children: const [
-                      Text("Month"),
-                      Text("Week"),
-                      Text("Day"),
-                    ],
                     isSelected: _views.map((v) => v == _currentView).toList(),
                     onPressed: (idx) {
                       setState(() {
@@ -212,6 +207,11 @@ class _CalendarWindowState extends State<CalendarWindow> {
                         _sfController.view = _currentView;
                       });
                     },
+                    children: const [
+                      Text("Month"),
+                      Text("Week"),
+                      Text("Day"),
+                    ],
                   ),
                 ),
               ],
