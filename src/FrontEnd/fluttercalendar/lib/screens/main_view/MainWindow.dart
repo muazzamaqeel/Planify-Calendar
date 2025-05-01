@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'UserRegistration.dart'; // Sign-Up Page
-import '../calendar_view/CalendarWindow.dart'; // Calendar view screen
+import '../calendar_view/Calendar_Main/InterfaceCalendar.dart'; // Calendar view screen
 
 class MainWindow extends StatefulWidget {
   const MainWindow({Key? key}) : super(key: key);
