@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'djangocalendar.urls'
+ROOT_URLCONF = 'djangocalendar.config.urls'
 
 TEMPLATES = [
     {
@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangocalendar.wsgi.application'
+WSGI_APPLICATION = 'djangocalendar.config.wsgi.application'
 
 
 # Database
