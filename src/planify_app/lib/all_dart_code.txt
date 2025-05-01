@@ -1,0 +1,1554 @@
+// ----- File: .\main.dart -----
+import 'package:flutter/material.dart';
+import 'screens/main_view/MainWindow.dart';
+import 'screens/calendar_view/Calendar_Main/InterfaceCalendar.dart';
+import 'screens/main_view/UserRegistration.dart';
+import '../screens/calendar_view/components/ThemeNotifier.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeNotifier(),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Planify',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: themeNotifier.currentTheme,
+      home: const MainWindow(),
+      routes: {
+        '/calendar': (context) => const CalendarWindow(),
+        '/signup': (context) => const UserRegistration(),
+      },
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\Calendar_Main\InterfaceCalendar.dart -----
+// File: screens/calendar_view/InterfaceCalendar.dart
+
+import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
+
+import '../sidebar/SidebarView.dart';
+import '../components/MiniCalendar.dart';
+
+// Simple Meeting class & DataSource
+class Meeting {
+  Meeting(this.title, this.from, this.to, this.color);
+  final String title;
+  final DateTime from, to;
+  final Color color;
+}
+
+class MeetingDataSource extends CalendarDataSource {
+  MeetingDataSource(List<Meeting> source) { appointments = source; }
+  @override DateTime getStartTime(int i) => appointments![i].from;
+  @override DateTime getEndTime(int i)   => appointments![i].to;
+  @override String   getSubject(int i)   => appointments![i].title;
+  @override Color    getColor(int i)     => appointments![i].color;
+}
+
+class CalendarWindow extends StatefulWidget {
+  const CalendarWindow({super.key});
+  @override
+  State<CalendarWindow> createState() => _CalendarWindowState();
+}
+
+class _CalendarWindowState extends State<CalendarWindow> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _sfController = CalendarController();
+
+  DateTime _miniFocused = DateTime.now();
+
+  // Map the 3 segments → these views:
+  static const List<CalendarView> _views = [
+    CalendarView.month, // Month grid
+    CalendarView.week,  // Vertical week (7 days across)
+    CalendarView.day,   // Day timeline
+  ];
+
+  // Start in “Week” by default
+  CalendarView _currentView = CalendarView.week;
+
+  late final MeetingDataSource _dataSource;
+  final _meetings = [
+    Meeting(
+      "UX Review",
+      DateTime.now().subtract(const Duration(hours: 1)),
+      DateTime.now().add(const Duration(hours: 1)),
+      Colors.purpleAccent,
+    ),
+    Meeting(
+      "Standup",
+      DateTime.now().add(const Duration(hours: 2)),
+      DateTime.now().add(const Duration(hours: 3)),
+      Colors.teal,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _dataSource = MeetingDataSource(_meetings);
+    _sfController.view = _currentView;
+  }
+
+  void _onSfTap(CalendarTapDetails details) {
+    if (details.targetElement == CalendarElement.appointment &&
+        details.appointments != null) {
+      final m = details.appointments!.first as Meeting;
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(m.title),
+          content: Text(
+              "${DateFormat.jm().format(m.from)} – ${DateFormat.jm().format(m.to)}"
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close")
+            )
+          ],
+        ),
+      );
+    }
+  }
+
+  void _jumpTo(DateTime date) {
+    setState(() {
+      _sfController.displayDate = date;
+      _miniFocused = date;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+
+      drawer: const SideBarView(),
+
+      appBar: GFAppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text("Planify",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            Text("Everything at one Place",
+                style: TextStyle(color: Colors.white70, fontSize: 12)),
+          ],
+        ),
+        backgroundColor: Colors.black87,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
+          ),
+        ],
+      ),
+
+      endDrawer: MiniCalendar(
+        focusedDay: _miniFocused,
+        onDateSelected: (day) {
+          _jumpTo(day);
+          Navigator.of(context).pop();
+        },
+        onMonthChanged: (month) => _jumpTo(month),
+        onClose: () => Navigator.of(context).pop(),
+      ),
+
+      body: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFE3F2FD), Color(0xFFF1F8E9)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))
+              ],
+            ),
+            child: Row(
+              children: [
+                Text(
+                  DateFormat.yMMMM().format(_miniFocused),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () => _jumpTo(DateTime.now()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  child: const Text("Today", style: TextStyle(color: Colors.deepPurple)),
+                ),
+                const SizedBox(width: 24),
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: () {
+                    final cur = _sfController.displayDate ?? DateTime.now();
+                    _jumpTo(DateTime(cur.year, cur.month - 1, 1));
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () {
+                    final cur = _sfController.displayDate ?? DateTime.now();
+                    _jumpTo(DateTime(cur.year, cur.month + 1, 1));
+                  },
+                ),
+                const Spacer(),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: ToggleButtons(
+                    borderWidth: 0,
+                    borderRadius: BorderRadius.circular(24),
+                    fillColor: Colors.indigo,
+                    selectedColor: Colors.white,
+                    color: Colors.black87,
+                    constraints: const BoxConstraints(minWidth: 60, minHeight: 36),
+                    isSelected: _views.map((v) => v == _currentView).toList(),
+                    onPressed: (idx) {
+                      setState(() {
+                        _currentView = _views[idx];
+                        _sfController.view = _currentView;
+                      });
+                    },
+                    children: const [
+                      Text("Month"),
+                      Text("Week"),
+                      Text("Day"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: SfCalendar(
+              controller: _sfController,
+              view: _currentView,
+              dataSource: _dataSource,
+              monthViewSettings: const MonthViewSettings(
+                appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+              ),
+              timeSlotViewSettings: const TimeSlotViewSettings(
+                startHour: 6,
+                endHour: 20,
+                timeInterval: Duration(minutes: 30),
+              ),
+              onTap: _onSfTap,
+              firstDayOfWeek: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\Calendar_Main\ViewDay.dart -----
+
+
+// ----- File: .\screens\calendar_view\Calendar_Main\ViewMonth.dart -----
+
+
+// ----- File: .\screens\calendar_view\Calendar_Main\ViewWeel.dart -----
+
+
+// ----- File: .\screens\calendar_view\components\CalendarCard.dart -----
+import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+
+class CalendarCard extends StatelessWidget {
+  final DateTime selectedDay;
+  final CalendarFormat calendarFormat;
+  final Map<DateTime, List<String>> events;
+  final Function(DateTime) onDaySelected;
+  final Function(CalendarFormat) onFormatChanged;
+
+  const CalendarCard({
+    Key? key,
+    required this.selectedDay,
+    required this.calendarFormat,
+    required this.events,
+    required this.onDaySelected,
+    required this.onFormatChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      elevation: 4,
+      margin: const EdgeInsets.all(16),
+      child: TableCalendar(
+        // Basic Calendar Setup
+        focusedDay: selectedDay,
+        firstDay: DateTime.utc(2020, 1, 1),
+        lastDay: DateTime.utc(2030, 12, 31),
+        calendarFormat: calendarFormat,
+        selectedDayPredicate: (day) => isSameDay(day, selectedDay),
+
+        // Callbacks
+        onDaySelected: (selectedDay, focusedDay) => onDaySelected(selectedDay),
+        onFormatChanged: (format) => onFormatChanged(format),
+        eventLoader: (day) => events[day] ?? [],
+
+        // Calendar Styles
+        headerStyle: HeaderStyle(
+          titleCentered: true,
+          formatButtonVisible: true,
+          formatButtonDecoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          formatButtonTextStyle: const TextStyle(color: Colors.white),
+          titleTextStyle: const TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+          leftChevronIcon: const Icon(Icons.chevron_left, color: Colors.black54),
+          rightChevronIcon: const Icon(Icons.chevron_right, color: Colors.black54),
+        ),
+        calendarStyle: CalendarStyle(
+          outsideDaysVisible: false,
+          // Today styling
+          todayDecoration: BoxDecoration(
+            color: Colors.blueGrey.shade200,
+            shape: BoxShape.circle,
+          ),
+          todayTextStyle: const TextStyle(color: Colors.black),
+          // Selected day styling
+          selectedDecoration: const BoxDecoration(
+            color: Colors.deepPurple,
+            shape: BoxShape.circle,
+          ),
+          selectedTextStyle: const TextStyle(color: Colors.white),
+          weekendTextStyle: const TextStyle(color: Colors.redAccent),
+        ),
+      ),
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\components\EventList.dart -----
+import 'package:flutter/material.dart';
+
+class EventList extends StatelessWidget {
+  final List<String> events;
+
+  const EventList({super.key, required this.events});
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return const Center(
+        child: Text('No events for this day'),
+      );
+    }
+    return ListView.builder(
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          leading: const Icon(Icons.event),
+          title: Text(events[index]),
+        );
+      },
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\components\MiniCalendar.dart -----
+import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+
+class MiniCalendar extends StatelessWidget {
+  /// Currently focused month
+  final DateTime focusedDay;
+  /// When a day is tapped
+  final void Function(DateTime) onDateSelected;
+  /// When user navigates months
+  final void Function(DateTime) onMonthChanged;
+  /// Close drawer
+  final VoidCallback onClose;
+
+  const MiniCalendar({
+    super.key,
+    required this.focusedDay,
+    required this.onDateSelected,
+    required this.onMonthChanged,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 280,
+      color: Color(0xFF1E1E2E),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Close Button
+              Align(
+                alignment: Alignment.topRight,
+                child: InkWell(
+                  onTap: onClose,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.indigo,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(Icons.close, color: Colors.white),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Calendar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: focusedDay,
+                  headerStyle: HeaderStyle(
+                    titleCentered: true,
+                    leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+                    rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
+                    titleTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    formatButtonVisible: false,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  calendarStyle: CalendarStyle(
+                    defaultTextStyle: TextStyle(color: Colors.white70),
+                    weekendTextStyle: TextStyle(color: Colors.redAccent),
+                    todayDecoration: BoxDecoration(
+                      color: Colors.indigo,
+                      shape: BoxShape.circle,
+                    ),
+                    selectedDecoration: BoxDecoration(
+                      color: Colors.indigo,
+                      shape: BoxShape.circle,
+                    ),
+                    outsideDaysVisible: false,
+                    cellMargin: EdgeInsets.zero,
+                  ),
+                  headerVisible: true,
+                  daysOfWeekVisible: true,
+                  selectedDayPredicate: (day) => isSameDay(day, focusedDay),
+                  onDaySelected: (day, _) => onDateSelected(day),
+                  onPageChanged: onMonthChanged,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Add Person Button
+              Center(
+                child: InkWell(
+                  onTap: () {},
+                  customBorder: CircleBorder(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.indigo,
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(Icons.add, color: Colors.white, size: 28),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+
+}
+
+// ----- File: .\screens\calendar_view\components\ThemeNotifier.dart -----
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ThemeNotifier extends ChangeNotifier {
+  bool isDarkMode = false;
+
+  ThemeNotifier() {
+    loadTheme();
+  }
+
+  ThemeMode get currentTheme => isDarkMode ? ThemeMode.dark : ThemeMode.light;
+
+  void setTheme(bool darkMode) async {
+    isDarkMode = darkMode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDarkMode);
+  }
+
+  void loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    notifyListeners();
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\event_handler\EventWindow.dart -----
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+class EventWindow extends StatelessWidget {
+  final DateTime date;
+  final List<String> events;
+  final void Function(String) onEventTap;
+
+  const EventWindow({
+    Key? key,
+    required this.date,
+    required this.events,
+    required this.onEventTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final formatted = DateFormat.yMMMMd().format(date);
+    if (events.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.event_busy,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No events on $formatted",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Tap the + button to add your first event",
+              style: TextStyle(color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: events.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (ctx, i) {
+        final desc = events[i];
+        // Extract time from description if present, else default icon
+        final timeMatch = RegExp(r'\d{1,2}:\d{2} [AP]M')
+            .firstMatch(desc);
+        final timeLabel = timeMatch?.group(0) ?? '';
+
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 8),
+            leading: CircleAvatar(
+              backgroundColor: Colors.deepPurple,
+              child: Text(
+                timeLabel.isNotEmpty
+                    ? timeLabel.split(' ')[0]
+                    : '•',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            title: Text(
+              desc,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => onEventTap(desc),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\notification_handler\NotificationsWindow.dart -----
+import 'package:flutter/material.dart';
+
+class NotificationsWindow {
+  /// Shows a semi-transparent overlay dialog with dummy notifications.
+  static void showNotificationOverlay(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,        // Allow dismiss on tap outside
+      barrierLabel: 'Notifications',   // Used for accessibility
+      barrierColor: Colors.black54,    // Semi-transparent dark background
+      pageBuilder: (ctx, anim1, anim2) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,  // Keep background transparent
+            child: Container(
+              width: 300,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Notifications',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Dummy notifications
+                  const Text('Dummy Notification #1'),
+                  const Text('Dummy Notification #2'),
+                  const Text('Dummy Notification #3'),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\sidebar\SidebarView.dart -----
+import 'package:flutter/material.dart';
+import '../../main_view/MainWindow.dart';
+import 'additional_views/SettingsView.dart';
+
+class SideBarView extends StatelessWidget {
+  const SideBarView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      width: 280,
+      backgroundColor: const Color(0xFF1E1E2E),
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Hello, Aida!',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(color: Colors.white),
+              ),
+            ),
+            Divider(color: Colors.white12, thickness: 1, height: 1),
+
+            // Menu Items
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  children: [
+                    _buildTile(
+                      icon: Icons.calendar_today,
+                      label: 'Calendar',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildTile(
+                      icon: Icons.event,
+                      label: 'Events',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildTile(
+                      icon: Icons.settings,
+                      label: 'Settings',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Future.delayed(const Duration(milliseconds: 50), () {
+                          SettingsView.showSettingsOverlay(context);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Logout Button
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainWindow()),
+                        (route) => false,
+                  );
+                },
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2A3D),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.logout, color: Colors.green),
+                      SizedBox(width: 8),
+                      Text(
+                        'Logout',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTile({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        tileColor: const Color(0xFF2A2A3D),
+        leading: Icon(icon, color: Colors.indigo),
+        title: Text(
+          label,
+          style: const TextStyle(color: Colors.white70),
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+// ----- File: .\screens\calendar_view\sidebar\additional_views\AccountView.dart -----
+
+
+// ----- File: .\screens\calendar_view\sidebar\additional_views\LanguageView.dart -----
+
+
+// ----- File: .\screens\calendar_view\sidebar\additional_views\SettingsView.dart -----
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../components/ThemeNotifier.dart';
+
+class SettingsView {
+  /// Displays an overlay with a modern settings interface containing several options.
+  static void showSettingsOverlay(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true, // Allow dismissal by tapping outside.
+      barrierLabel: 'Settings', // Accessibility label.
+      barrierColor: Colors.black54, // Semi-transparent background.
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: Material(
+            color:
+                Colors.transparent, // Keep the overlay background transparent.
+            child: Container(
+              width: 400,
+              height: 500,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.account_circle),
+                          title: const Text('Account'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.notifications),
+                          title: const Text('Notifications'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.security),
+                          title: const Text('Privacy & Security'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {},
+                        ),
+
+                        // Theme Selection Dialog
+                        ListTile(
+                          leading: const Icon(Icons.color_lens),
+                          title: const Text('Theme'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Choose Theme'),
+                                  content: Consumer<ThemeNotifier>(
+                                    builder: (context, notifier, child) {
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          RadioListTile<bool>(
+                                            title: const Text('Light Mode'),
+                                            value: false,
+                                            groupValue: notifier.isDarkMode,
+                                            onChanged: (value) {
+                                              notifier.setTheme(false);
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          RadioListTile<bool>(
+                                            title: const Text('Dark Mode'),
+                                            value: true,
+                                            groupValue: notifier.isDarkMode,
+                                            onChanged: (value) {
+                                              notifier.setTheme(true);
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+
+                        ListTile(
+                          leading: const Icon(Icons.language),
+                          title: const Text('Language'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.info),
+                          title: const Text('About'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close Settings'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+// ----- File: .\screens\calendar_view\sidebar\additional_views\ThemeView.dart -----
+
+
+// ----- File: .\screens\main_view\HomePage.dart -----
+import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../calendar_view/components/CalendarCard.dart';
+import '../calendar_view/components/EventList.dart';
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+  DateTime _selectedDay = DateTime.now();
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  final Map<DateTime, List<String>> _events = {};
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  void _onDaySelected(DateTime selectedDay) {
+    setState(() {
+      _selectedDay = selectedDay;
+    });
+  }
+
+  void _onFormatChanged(CalendarFormat format) {
+    setState(() {
+      _calendarFormat = format;
+    });
+  }
+
+  void _addEvent() {
+    setState(() {
+      if (_events[_selectedDay] == null) {
+        _events[_selectedDay] = [];
+      }
+      _events[_selectedDay]!.add(
+        "Event at ${DateFormat('hh:mm a').format(DateTime.now())}",
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: GFAppBar(
+        title: Text(widget.title),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Column(
+        children: [
+          // Calendar UI
+          CalendarCard(
+            selectedDay: _selectedDay,
+            calendarFormat: _calendarFormat,
+            events: _events,
+            onDaySelected: _onDaySelected,
+            onFormatChanged: _onFormatChanged,
+          ),
+          // Event List UI
+          Expanded(
+            child: EventList(
+              events: _events[_selectedDay] ?? [],
+            ),
+          ),
+        ],
+      ),
+      // Floating Action Buttons
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: _addEvent,
+            label: const Text("Add Event"),
+            icon: const Icon(Icons.add),
+            backgroundColor: Colors.orange,
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            onPressed: _incrementCounter,
+            label: Text("Count: $_counter"),
+            icon: const Icon(Icons.add_circle_outline),
+            backgroundColor: Colors.deepPurple,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+// ----- File: .\screens\main_view\MainWindow.dart -----
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'UserRegistration.dart'; // Sign-Up Page
+import '../calendar_view/Calendar_Main/InterfaceCalendar.dart'; // Calendar view screen
+
+class MainWindow extends StatefulWidget {
+  const MainWindow({Key? key}) : super(key: key);
+
+  @override
+  State<MainWindow> createState() => _MainWindowState();
+}
+
+class _MainWindowState extends State<MainWindow> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+  String _statusMessage = '';
+  Color _statusColor = Colors.red;
+
+  final String _baseUrl = "http://localhost:8000/api";
+
+  void _togglePasswordVisibility() {
+    setState(() => _obscurePassword = !_obscurePassword);
+  }
+
+  void _navigateToSignUp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const UserRegistration()),
+    );
+  }
+
+  Future<void> _validateUser() async {
+    setState(() => _statusMessage = '');
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/validate_user/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email_or_username': _usernameController.text.trim(),
+          'password': _passwordController.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['message'] == 'Login successful') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const CalendarWindow()),
+          );
+        } else {
+          setState(() => _statusMessage = data['message'] ?? 'Invalid credentials');
+        }
+      } else {
+        setState(() => _statusMessage = 'Error ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() => _statusMessage = 'Network Error');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Dark gradient background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.indigo.shade900,
+                  Colors.blueGrey.shade900,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              // Left welcome panel
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(48.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Welcome\nBack...',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Right sign-in panel
+              Expanded(
+                child: Center(
+                  child: Container(
+                    width: 360,
+                    padding: const EdgeInsets.all(24.0),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Sign in to continue',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        _outlineField(
+                          controller: _usernameController,
+                          hint: 'Email or Username',
+                          icon: Icons.person_outline,
+                        ),
+                        const SizedBox(height: 16),
+                        _outlineField(
+                          controller: _passwordController,
+                          hint: 'Password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          suffix: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.white70,
+                            ),
+                            onPressed: _togglePasswordVisibility,
+                          ),
+                        ),
+                        if (_statusMessage.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _statusMessage,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.openSans(
+                              color: _statusColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _validateUser,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Sign In',
+                            style: GoogleFonts.openSans(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _navigateToSignUp,
+                          child: Text(
+                            "Don't have an account? Sign Up",
+                            style: GoogleFonts.openSans(
+                              color: Colors.white70,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _outlineField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscureText = false,
+    Widget? suffix,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white70),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+}
+
+// ----- File: .\screens\main_view\UserRegistration.dart -----
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart';
+
+class UserRegistration extends StatefulWidget {
+  const UserRegistration({super.key});
+
+  @override
+  _UserRegistrationState createState() => _UserRegistrationState();
+}
+
+class _UserRegistrationState extends State<UserRegistration> {
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+  String _statusMessage = '';
+  Color _statusColor = Colors.red;
+
+  Future<void> _signUp() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _statusMessage = '';
+    });
+
+    final uri = Uri.parse('http://127.0.0.1:8000/api/signup/');
+    final payload = {
+      'name': _fullNameController.text,
+      'username': _usernameController.text,
+      'email': _emailController.text,
+      'password': _passwordController.text,
+      'age': 22,
+      'gender': 'Other',
+    };
+
+    try {
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+      setState(() => _isLoading = false);
+
+      if (res.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User Registered Successfully!')),
+        );
+        Navigator.pop(context);
+      } else {
+        final data = jsonDecode(res.body);
+        setState(() => _statusMessage = data['error'] ?? 'Registration failed');
+        _statusColor = Colors.red;
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _statusMessage = 'An error occurred';
+        _statusColor = Colors.red;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.indigo.shade900, Colors.blueGrey.shade900],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width > 600 ? 400 : double.infinity),
+              child: Card(
+                color: Colors.black.withOpacity(0.6),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                elevation: 12,
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Create Your Account',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildField(
+                        controller: _fullNameController,
+                        hint: 'Full Name',
+                        icon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildField(
+                        controller: _emailController,
+                        hint: 'Email',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildField(
+                        controller: _usernameController,
+                        hint: 'Username (Optional)',
+                        icon: Icons.account_circle_outlined,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildField(
+                        controller: _passwordController,
+                        hint: 'Password',
+                        icon: Icons.lock_outline,
+                        obscureText: _obscurePassword,
+                        suffix: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildField(
+                        controller: _confirmPasswordController,
+                        hint: 'Confirm Password',
+                        icon: Icons.lock_outline,
+                        obscureText: _obscureConfirm,
+                        suffix: IconButton(
+                          icon: Icon(
+                            _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                        ),
+                      ),
+                      if (_statusMessage.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _statusMessage,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.openSans(
+                            color: _statusColor,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _signUp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          elevation: 6,
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : Text(
+                          'Sign Up',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.openSans(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          "Already have an account? Sign In",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.openSans(color: Colors.white70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscureText = false,
+    Widget? suffix,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      style: GoogleFonts.openSans(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.openSans(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white70),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+    );
+  }
+}
+
