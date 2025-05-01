@@ -21,14 +21,14 @@ class MeetingDataSource extends CalendarDataSource {
   MeetingDataSource(List<Meeting> source) {
     appointments = source;
   }
-  @override DateTime getStartTime(int i) => appointments![i].from;
-  @override DateTime getEndTime(int i)   => appointments![i].to;
-  @override String   getSubject(int i)   => appointments![i].title;
-  @override Color    getColor(int i)     => appointments![i].color;
+  @override DateTime getStartTime(int index) => appointments![index].from;
+  @override DateTime getEndTime(int index)   => appointments![index].to;
+  @override String   getSubject(int index)   => appointments![index].title;
+  @override Color    getColor(int index)     => appointments![index].color;
 }
 
 class CalendarWindow extends StatefulWidget {
-  const CalendarWindow({Key? key}) : super(key: key);
+  const CalendarWindow({super.key});
   @override State<CalendarWindow> createState() => _CalendarWindowState();
 }
 
