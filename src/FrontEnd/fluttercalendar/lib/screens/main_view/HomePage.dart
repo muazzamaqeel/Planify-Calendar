@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-import '../../widgets/CalendarCard.dart';
-import '../../widgets/EventList.dart';
+import '../calendar_view/components/CalendarCard.dart';
+import '../calendar_view/components/EventList.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
