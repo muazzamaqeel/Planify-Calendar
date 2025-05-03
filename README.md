@@ -36,3 +36,9 @@ Running the Front-End
 - Execute: flutter run -d windows
   Result:
   - ![image](https://github.com/user-attachments/assets/298fdaa8-7915-4115-83a0-08e692da5ab5)
+ 
+
+### Concepts
+Encryption/Decryption
+Software Desgin Patterns 
+AI 
